@@ -8,8 +8,6 @@
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
   --primary: rgb(124 58 237);
   --primary-foreground: #ffffff;
   --muted: #f1efec;
@@ -31,8 +29,6 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-muted: var(--muted);
@@ -234,14 +230,57 @@ body {
   }
 }
 
-/* ------------------------------------------------------------ Tooltip entrance (ui/tooltip.tsx) */
-.tooltip-in {
-  animation: tooltip-in 0.16s ease-out;
+/* ------------------------------------------------------------ The wait-list rocket (ui/subscribe-dialog.tsx)
+   It trembles on the pad, lifts off up and to the right out of its box, and comes back in from the lower left. */
+.rocket-pad {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  overflow: hidden;
 }
-@keyframes tooltip-in {
-  from {
+.rocket-launch {
+  animation: rocket-launch 4.2s cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+@keyframes rocket-launch {
+  0%,
+  36% {
+    transform: translate(0, 0);
+  }
+  40% {
+    transform: translate(-0.6px, 0.6px) rotate(-2deg);
+  }
+  44% {
+    transform: translate(0.4px, -0.2px) rotate(1.5deg);
+  }
+  48% {
+    transform: translate(-0.6px, 0.6px) rotate(-2deg);
+  }
+  52% {
+    transform: translate(-1.5px, 1.5px) rotate(0deg);
+  }
+  66% {
+    transform: translate(26px, -26px);
+    opacity: 1;
+  }
+  66.01% {
+    transform: translate(-26px, 26px);
     opacity: 0;
-    transform: scale(0.96);
+  }
+  70% {
+    transform: translate(-26px, 26px);
+    opacity: 1;
+  }
+  88% {
+    transform: translate(1.5px, -1.5px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rocket-launch {
+    animation: none;
   }
 }
 

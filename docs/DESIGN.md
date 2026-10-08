@@ -6,10 +6,10 @@ Vision REAL uses the **VisionPitts design system**: white and clean, violet as t
 
 | Screen | Layout |
 |---|---|
-| Start page | A full-height Orbit hero. The header has the site's name (no logo), the **Explore map** and **Insights** links, and one button, **Subscribe**. The slogan sits at the top left, and the data globe rises from the bottom. No map. On a phone the globe is as wide as the screen and nearly all of it shows. |
-| Insights | The same header, a title, then one row per dataset (a hover photo follows the cursor), then the footer. |
-| Coming soon | Before launch, in place of the map and Insights: the same header, then a violet thinking orb, "Superloading…" and one line, centered. |
-| Subscribe pop-up | One rounded card over a blurred page: a title, three facts in words, four rounded bars that spring up and lift on hover (each names a part of the site in a tooltip; their heights are not figures, so no percentages show), a legend, and the email form. Before launch it reads "Wait for the launch". |
+| Start page | A full-height Orbit hero. The header has the site's name (no logo; "REAL" is highlighted in a violet gradient over a soft violet block, with a blinking cursor, `ui/text-loop.tsx`), the **Explore map** and **Insights** links, and one button, **Subscribe**. The slogan sits at the top left, and the data globe rises from the bottom. No map. On a phone the globe is as wide as the screen and nearly all of it shows. |
+| Insights | The same header, a title, then one row per dataset (a hover photo follows the cursor). No footer. |
+| Coming soon | Before launch, in place of the map and Insights: the same header, then a large violet thinking orb (240 px), a small "Superloading…" and one small line, centered. No footer. |
+| Subscribe pop-up | One rounded card over a blurred page: a title, three facts in words, four rounded bars that spring up and lift on hover, a caption inside the same panel that names and describes the bar pointed at (their heights are not figures, so no percentages show), a legend, and the email form. Nothing floats outside the card. Before launch it reads "Wait for the launch", beside a rocket that lifts off and returns on a loop. |
 | Map (wide) | Full-bleed map. Top-left: Home and the brand. Left: the floating **Data** panel (Datasets and Settings sections, VisionPitts switches); it folds into a tab. Top-right: **Ask the map**, with the **Details** panel under it, which also folds. Bottom-left: the legend. Top-center: a dark hint pill until a dataset is on. |
 | Map (phone) | The Data panel on top (40% height at most), the chat box and Details as a sheet along the bottom, and map zoom buttons hidden. |
 

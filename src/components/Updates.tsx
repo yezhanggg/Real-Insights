@@ -2,7 +2,6 @@
 import { useEffect } from 'react';
 import { layers, site } from '../lib/content';
 import { ProjectShowcase, type ShowcaseItem } from './ui/project-showcase';
-import SiteFooter from './ui/footer-1';
 import SiteHeader from './SiteHeader';
 import { exploreMap } from './Landing';
 
@@ -54,7 +53,6 @@ export default function Updates() {
           <p className="border-y border-border py-6 text-muted-foreground">The first dataset is on its way. Subscribe and you'll hear the day it goes live.</p>
         </section>
       )}
-      <SiteFooter />
     </div>
   );
 }

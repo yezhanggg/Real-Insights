@@ -40,7 +40,7 @@ Add a domain under Vercel → Domains, or keep `<project>.vercel.app`. Then upda
 2. To announce new data, either:
    - **Write it yourself.** Buttondown → New email, with a few lines and a link to `/map/<dataset-id>`. This is the most personal option.
    - **Automate it.** Buttondown → Settings → RSS → add `https://<your-domain>/feed.xml`. Every new dataset then sends (or drafts) an email.
-3. Sign-ups are tagged with where they came from (`subscribe`, `gate:/map/…`, `footer`).
+3. Sign-ups are tagged with where they came from (`launch` for the wait-list, `popup`, `gate:/map/…`).
 
 **Supabase.** It stores emails in your own table; you send from any tool you like.
 

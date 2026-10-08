@@ -91,7 +91,7 @@ popup:
 
 ## Site settings
 
-`content/site.yaml` holds the title, tagline, the public URL (used by the RSS feed and the sitemap), where the map lands when opened (`home`), footer links, and the **subscribe gate**:
+`content/site.yaml` holds the title, tagline, the public URL (used by the RSS feed and the sitemap), where the map lands when opened (`home`), `links` (not shown anywhere since the footer was removed), and the **subscribe gate**:
 
 | `gate:` | Without subscribing, a reader can… |
 |---|---|

@@ -1,4 +1,4 @@
-// One sign-up path for every form on the site (Subscribe page, footer): POST /api/subscribe, then remember it.
+// The one sign-up path on the site (the Subscribe pop-up): POST /api/subscribe, then remember it.
 import { useState } from 'react';
 import { rememberSubscribed, useApp } from './store';
 

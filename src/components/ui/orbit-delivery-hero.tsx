@@ -12,6 +12,7 @@ import { WORLD_DOTS } from "./world-dots";
 import { WORLD_LINES } from "./world-lines";
 import { CursorCrosshair } from "./cursor-crosshair";
 import { SubscribeButton } from "./3d-button";
+import { BrandMark } from "./text-loop";
 import { TextReveal } from "./text-reveal";
 
 // ------------------------------------------------------------------ motion
@@ -581,7 +582,7 @@ function HeroPage({ brand, onExplore, onUpdates, onSubscribe, subscribed }) {
       <CursorCrosshair />
       <header className="site-header">
         <a href="/" className="wordmark" aria-label={`${brand} home`}>
-          {brand}
+          <BrandMark name={brand} />
         </a>
         <nav aria-label="Main navigation">
           <a href="/map" onClick={(e) => (e.preventDefault(), onExplore())}>

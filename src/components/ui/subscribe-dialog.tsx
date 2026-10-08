@@ -1,6 +1,7 @@
 // The Subscribe pop-up: one card (the 21st.dev "health-stat-card") with the email form under its legend. Email only
 // (no accounts, no passwords). Before launch (`launched: false` in content/site.yaml) it is a wait-list: put down an
-// email and wait for the launch. Its three facts are words, and its bars carry no figures; they name what is coming.
+// email and wait for the launch. Its three facts are words, and its bars carry no figures; they name what is coming,
+// and the one pointed at is described in a caption inside the chart panel.
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Check, Mail, MapPinned, Rocket, X } from 'lucide-react';
@@ -12,9 +13,9 @@ import { HealthStatCard, type HealthGraphData, type StatData } from './health-st
 
 /** What the site is made of. The heights are for the eye only (a skyline), so no percentages are shown. */
 const PARTS: HealthGraphData[] = [
-  { label: 'Live map', value: 92, color: '#7c3aed', description: 'Every dataset on one 3D map. Click any shape for its numbers.' },
+  { label: 'Live map', value: 92, color: '#7c3aed', description: 'Every dataset on one 3D map. Click a shape for its numbers.' },
   { label: 'Insights', value: 64, color: '#a78bfa', description: 'Each new dataset as it lands, newest first.' },
-  { label: 'Ask the map', value: 78, color: '#22d3ee', description: 'Questions answered from the published data, checked number by number.' },
+  { label: 'Ask the map', value: 78, color: '#22d3ee', description: 'Answers from the published data, checked number by number.' },
   { label: 'Open data', value: 52, color: '#4c1d95', description: 'Source, date, license and a download with every layer.' },
 ];
 
@@ -142,7 +143,15 @@ export function SubscribeDialog() {
             </button>
             <HealthStatCard
               className="rounded-3xl border-black/5 p-7 shadow-2xl"
-              headerIcon={waiting ? <Rocket className="h-6 w-6" /> : <MapPinned className="h-6 w-6" />}
+              headerIcon={
+                waiting ? (
+                  <span className="rocket-pad">
+                    <Rocket className="rocket-launch h-6 w-6" />
+                  </span>
+                ) : (
+                  <MapPinned className="h-6 w-6" />
+                )
+              }
               title={waiting ? 'Wait for the launch' : next ? 'Subscribe to open the map' : 'Subscribe'}
               titleId="subscribe-title"
               stats={stats}

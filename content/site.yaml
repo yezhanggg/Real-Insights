@@ -22,7 +22,7 @@ gate: map
 # Before launch, keep this false: "Explore map" and "Insights" answer "Coming soon" where they stand, and Subscribe
 # is a wait-list ("leave your email and wait for the launch"). Set it to true on launch day and the links open.
 launched: false
-# Optional links shown at the bottom of the landing page.
+# Optional links. Not shown anywhere at the moment (the pages have no footer).
 links:
   - label: LinkedIn
     url: https://www.linkedin.com/

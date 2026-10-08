@@ -2,7 +2,6 @@
 import { useEffect } from 'react';
 import { layers, site } from '../lib/content';
 import { ProjectShowcase, type ShowcaseItem } from './ui/project-showcase';
-import SiteHeader from './SiteHeader';
 import { exploreMap } from './Landing';
 
 /** Stock city photos (Unsplash) for releases that have no cover image of their own. */
@@ -32,8 +31,7 @@ export default function Updates() {
 
   return (
     <div className="min-h-full bg-[radial-gradient(ellipse_at_6%_0%,#fffdfb_0%,#fcfbff_40%,#f6f2ff_100%)]">
-      <SiteHeader current="updates" />
-      <main className="mx-auto max-w-2xl px-6 pt-10">
+      <main className="mx-auto max-w-2xl px-6 pt-[calc(var(--header-h)+2.5rem)]">
         <p className="text-xs font-medium uppercase tracking-[0.36em] text-violet-500">Insights</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">Every dataset, as it lands.</h1>
         <p className="mt-4 text-lg text-[#7f7699]">New data goes on the live map as it's ready. Hover a release for a preview; open it to see it on the map.</p>

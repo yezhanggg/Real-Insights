@@ -4,12 +4,14 @@ Vision REAL uses the **VisionPitts design system**: white and clean, violet as t
 
 ## Layout
 
+Every page except the map tool has the same header in the same place (`SiteHeader.tsx`, mounted once by `App.tsx`): the site's name on the left (no logo; "REAL" in a violet gradient, which wipes in once over a violet block with a cursor that then fade away, `ui/text-loop.tsx`), the **Explore map** and **Insights** links in the middle, and one button, **Subscribe**, on the right. On phones the two links drop to their own row.
+
 | Screen | Layout |
 |---|---|
-| Start page | A full-height Orbit hero. The header has the site's name (no logo; "REAL" is highlighted in a violet gradient over a soft violet block, with a blinking cursor, `ui/text-loop.tsx`), the **Explore map** and **Insights** links, and one button, **Subscribe**. The slogan sits at the top left, and the data globe rises from the bottom. No map. On a phone the globe is as wide as the screen and nearly all of it shows. |
-| Insights | The same header, a title, then one row per dataset (a hover photo follows the cursor). No footer. |
-| Coming soon | Before launch, in place of the map and Insights: the same header, then a large violet thinking orb (240 px), a small "Superloading…" and one small line, centered. No footer. |
-| Subscribe pop-up | One rounded card over a blurred page: a title, three facts in words, four rounded bars that spring up and lift on hover, a caption inside the same panel that names and describes the bar pointed at (their heights are not figures, so no percentages show), a legend, and the email form. Nothing floats outside the card. Before launch it reads "Wait for the launch", beside a rocket that lifts off and returns on a loop. |
+| Start page | A full-height Orbit hero under the site header. The slogan sits at the top left, and the data globe rises from the bottom. No map. On a phone the globe is as wide as the screen and nearly all of it shows. |
+| Insights | A title, then one row per dataset (a hover photo follows the cursor). No footer. |
+| Coming soon | Before launch, in place of the map and Insights: a large violet thinking orb (240 px), a small "Superloading…" and one small line, centered. No footer. |
+| Subscribe pop-up | One rounded card over a blurred page: a title, three facts in words, four rounded bars that spring up and lift on hover, a caption under them that names and describes the bar pointed at (their heights are not figures, so no percentages show), a legend, and the email form. Nothing floats outside the card. Before launch it reads "Wait for the launch", beside a rocket that lifts off and returns on a loop. |
 | Map (wide) | Full-bleed map. Top-left: Home and the brand. Left: the floating **Data** panel (Datasets and Settings sections, VisionPitts switches); it folds into a tab. Top-right: **Ask the map**, with the **Details** panel under it, which also folds. Bottom-left: the legend. Top-center: a dark hint pill until a dataset is on. |
 | Map (phone) | The Data panel on top (40% height at most), the chat box and Details as a sheet along the bottom, and map zoom buttons hidden. |
 
@@ -21,8 +23,8 @@ Vision REAL uses the **VisionPitts design system**: white and clean, violet as t
   - **Instrument rings:** two thin orbit rings, one violet with tick marks and one cyan (`OrbitRings`). Each swings slowly around the vertical like a gyroscope, and a point of light with a fading tail runs along it.
 - **No figure.** The globe is the whole scene.
 - **Interaction:** the globe is already turning when the page opens and never stops; there is no pause control. Drag to spin it (a drag across the page is about two turns); on release it eases straight back into its own turn. Arrow keys nudge it. With a mouse, a crosshair follows the pointer across the hero: two violet hairlines and a small square that stands in for the pointer over the globe and grows while dragging (`ui/cursor-crosshair.tsx`). There's no on-screen drag hint. With reduced motion, the scan line, pulses and rings hold still.
-- **The copy** is the slogan under a short rule: "See the real. Tell the story. Drive the change." and, below it, "AI-powered housing insight for every city." It comes in word by word (`ui/text-reveal.tsx`), the slogan in deep violet and the second line in a lighter one.
-- **Caption type.** Every line of words on the start page is set as a caption: small capitals, tracked 0.25em, with a line height near 1.9, in lavender. That covers the statement (14–17 px), the header links and the Subscribe label (11 px), and the loading note (10 px). The brand name is the one exception. The plain pages' header (`SiteHeader.tsx`) uses the same links and button.
+- **The copy** is the slogan under a short rule: "See the real. Tell the story. Drive the change." and, below it, "AI-powered housing insight for every city." Each line settles out of random capitals when the page opens, and again whenever the pointer comes onto it (`ui/text-scramble.tsx`); the slogan is in deep violet and the second line in a lighter one.
+- **Caption type.** Every line of words on the start page is set as a caption: small capitals, tracked 0.25em, with a line height near 1.9, in lavender. That covers the statement (14–17 px), the header links and the Subscribe label (11 px), and the loading note (10 px). The brand name is the one exception.
 - **The Subscribe button** is a clear pill with a hairline violet edge, upright (`ui/3d-button.tsx`, styles under `.sub3d` in `src/styles.css`). On hover its letters roll over one by one, a light runs round the edge and the arrow swings. A press splashes short lines outward. After a click the outline draws itself and the label changes to "Join us" while the button keeps focus. Once subscribed it is a still "Subscribed ✓". On phones the two links drop to their own row under the name so the button stays on screen.
 
 ## Tokens (`src/styles.css`, same values as VisionPitts)

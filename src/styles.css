@@ -4,6 +4,8 @@
 /* Theme: the VisionPitts system. Violet primary (also the map's "here" color), warm off-white surfaces, white cards. */
 :root {
   --radius: 0.75rem;
+  /* Height of the site header (SiteHeader.tsx); every page leaves this much room at the top. */
+  --header-h: 104px;
   --background: #fbfaf8;
   --foreground: #0f172a;
   --card: #ffffff;
@@ -22,6 +24,18 @@
   --ring: rgb(167 139 250);
   --destructive: #e11d48;
   --destructive-foreground: #ffffff;
+}
+
+@media (max-width: 1150px) {
+  :root {
+    --header-h: 90px;
+  }
+}
+/* Phones: the two links sit on their own row under the name and the button. */
+@media (max-width: 759px) {
+  :root {
+    --header-h: 112px;
+  }
 }
 
 @theme inline {

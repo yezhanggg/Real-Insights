@@ -1,8 +1,8 @@
 // A stat card (21st.dev "health-stat-card"): a title, three headline facts, a row of bars that spring up and lift on
 // hover, and a legend. Changes: Motion instead of framer-motion; `children` go under the legend (the Subscribe form
 // lives there); `showValues={false}` leaves the percentages out, for bars that are there to be looked at, not read as
-// measurements; and a bar's name and description show in a caption inside the chart panel, where the template had a
-// tooltip floating over the card.
+// measurements; a bar's name and description show in a caption under the bars, inside the card, where the template
+// had a tooltip floating over it; and the grey panel behind the bars is gone.
 import * as React from 'react';
 import { AnimatePresence, motion, type Variants } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -83,9 +83,9 @@ export const HealthStatCard = React.forwardRef<HTMLDivElement, HealthStatCardPro
           ))}
         </div>
 
-        {/* Animated graph, with its caption inside the panel */}
+        {/* Animated graph, with its caption under the bars. No tinted panel behind it: the bars stand on the card. */}
         {graphData && current && (
-          <div className="rounded-lg bg-muted/50 p-4">
+          <div>
             <motion.div className={cn('flex w-full items-end gap-2', barMaxWidth ? 'justify-around' : 'justify-between')} variants={containerVariants} initial="hidden" animate="visible" style={{ height: graphHeight }}>
               {graphData.map((bar, i) => (
                 <motion.button

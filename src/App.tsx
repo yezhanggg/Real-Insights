@@ -11,6 +11,7 @@ import ComingSoon from './components/ComingSoon';
 import Landing from './components/Landing';
 import Updates from './components/Updates';
 import MapTool from './components/MapTool';
+import SiteHeader from './components/SiteHeader';
 import { SubscribeDialog } from './components/ui/subscribe-dialog';
 
 function Missing() {
@@ -49,8 +50,11 @@ export default function App() {
   else if (route.name === 'updates') screen = <Updates />;
   else if (route.name === 'missing') screen = <Missing />;
   else screen = <Landing />;
+  // One header, in the same place on every page. Only the map tool goes without: it is a full-screen tool.
+  const mapTool = route.name === 'map' && !asked && !soon;
   return (
     <>
+      {!mapTool && <SiteHeader current={route.name === 'map' ? 'map' : route.name === 'updates' ? 'updates' : undefined} />}
       {screen}
       <SubscribeDialog />
     </>

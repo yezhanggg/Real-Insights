@@ -73,7 +73,7 @@ It's a friendly ask, not security: the browser remembers the sign-up, and the da
 
 React 19 · TypeScript · Vite · Tailwind CSS 4 (shadcn conventions: `@/` alias, `components/ui`, `cn`) · Motion · MapLibre GL 5 (OpenFreeMap positron, Mapterhorn/USGS 3DEP terrain, 3D buildings) · three.js + React Three Fiber (start page) · Zustand · Vercel (static site + two serverless functions) · DeepSeek (`deepseek-flash`) · Python 3.11+ with GeoPandas for the data.
 
-The map tool, chat box and design system come from [VisionPitts](https://ye-zhang-vision-pitts.vercel.app). The start-page hero and its slogan scramble, the name mark, the cursor crosshair, the Subscribe button, the updates list and the Subscribe pop-up are 21st.dev components adapted to the site; see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#integrated-ui-components).
+The map tool, chat box and design system come from [VisionPitts](https://ye-zhang-vision-pitts.vercel.app). The start-page hero and its slogan scramble, the name mark, the cursor crosshair, the Subscribe button, the updates list, the Subscribe pop-up and its join button are 21st.dev components adapted to the site; see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#integrated-ui-components).
 
 ## Principles
 

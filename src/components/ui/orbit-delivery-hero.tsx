@@ -392,10 +392,42 @@ function AdaptiveResolution({ active }) {
 }
 
 // ------------------------------------------------------------------ the planet scene
+/** The camera always shows this many world units across, whatever the stage's size. */
+const WORLD_W = 5.25;
+/** The same condition as the stacked layout in the CSS below: a portrait screen, or a very narrow one. */
+const STACKED = "(orientation: portrait), (max-width: 539px)";
+/**
+ * Where the globe sits, for a stage of any shape (world units; the origin is the middle of the stage).
+ * - Stacked (portrait): the stage is the room under the slogan. The globe is as wide as the screen, or as tall as the
+ *   room allows, and nearly all of it shows.
+ * - Landscape: the stage is the whole hero and the slogan lies over its top left. The globe is a horizon on the
+ *   bottom edge, centered and wide when there is room. `copy` is the slogan's lower right corner in stage pixels;
+ *   when the globe would reach it (a phone on its side, a low window), the globe shrinks and slides right, step by
+ *   step, until it is clear.
+ */
+function globeLayout(width, height, stacked, copy) {
+  const worldH = (height * WORLD_W) / width;
+  if (stacked) {
+    const radius = Math.min(WORLD_W * 0.5, worldH * 0.52);
+    return { radius, x: 0, y: -worldH / 2 + radius * 0.9 };
+  }
+  const px = WORLD_W / width;
+  const corner = copy ? { x: (copy.right - width / 2) * px, y: (height / 2 - copy.bottom) * px } : null;
+  let layout;
+  for (let step = 0; step <= 30; step++) {
+    // Steps 0–20 slide the globe from centered and wide to right and narrow; after that it only gets smaller.
+    const t = Math.min(1, step / 20);
+    const shrink = step > 20 ? 0.94 ** (step - 20) : 1;
+    const radius = Math.min(WORLD_W * MathUtils.lerp(0.44, 0.3, t), worldH * MathUtils.lerp(0.82, 0.95, t)) * shrink;
+    layout = { radius, x: Math.min(WORLD_W * 0.22 * t, WORLD_W / 2 - radius * 0.86), y: -worldH / 2 - radius * MathUtils.lerp(0.15, 0.1, t) };
+    if (!corner || Math.hypot(corner.x - layout.x, corner.y - layout.y) >= radius * 1.07 + 14 * px) break;
+  }
+  return layout;
+}
 function ResponsiveCamera() {
   const { size, camera } = useThree();
   useEffect(() => {
-    camera.zoom = size.width / (size.width < 700 ? 5.65 : 5.25);
+    camera.zoom = size.width / WORLD_W;
     camera.updateProjectionMatrix();
   }, [size.width, size.height, camera]);
   return null;
@@ -433,7 +465,7 @@ function Coastlines({ ghost = false }) {
   );
 }
 
-function World({ motion, reduced, onReady }) {
+function World({ motion, reduced, stacked, copy, onReady }) {
   const planet = useRef(null);
   useEffect(() => {
     onReady?.(true);
@@ -443,14 +475,7 @@ function World({ motion, reduced, onReady }) {
   const depth = useMemo(depthOnly, []);
   const globe = useMemo(createGlobeMotion, []);
   const size = useThree((state) => state.size);
-  const small = size.width < 700;
-  // The camera shows a fixed width in world units (ResponsiveCamera). On a wide screen the globe's center sits just
-  // below the bottom edge, so a little less than its upper half shows, like a horizon. On a phone the stage is tall
-  // and narrow, so the globe is as wide as the screen and nearly all of it shows.
-  const worldW = small ? 5.65 : 5.25;
-  const worldH = (size.height * worldW) / size.width;
-  const radius = Math.min(worldW * (small ? 0.5 : 0.44), worldH * (small ? 0.52 : 0.82));
-  const centerY = -worldH / 2 + radius * (small ? 0.9 : -0.15);
+  const { radius, x: centerX, y: centerY } = globeLayout(size.width, size.height, stacked, copy);
   useFrame((_, delta) => {
     const m = motion.current;
     const elapsed = Math.min(delta, 0.05),
@@ -460,7 +485,7 @@ function World({ motion, reduced, onReady }) {
     planet.current.quaternion.copy(globe.orientation);
   });
   return (
-    <group position={[0, centerY, 0]}>
+    <group position={[centerX, centerY, 0]}>
       <group ref={planet} scale={radius} quaternion={globe.orientation}>
         {/* Far side first (faint), then a depth-only shell, then the bright front layers. */}
         <mesh material={glassBack} renderOrder={1}>
@@ -542,6 +567,24 @@ function HeroPage() {
   const [visible, setVisible] = useState(true),
     [tabVisible, setTabVisible] = useState(true);
   const [reduced, setReduced] = useState(false);
+  const [stacked, setStacked] = useState(() => typeof matchMedia !== "undefined" && matchMedia(STACKED).matches);
+  // The slogan's lower right corner, in the stage's own pixels, so the globe can keep clear of it (landscape only).
+  const copyRef = useRef(null);
+  const [copy, setCopy] = useState(null);
+  useEffect(() => {
+    const measure = () => {
+      const stage = interaction.current?.getBoundingClientRect();
+      const text = copyRef.current?.getBoundingClientRect();
+      if (!stage || !text) return;
+      const next = { right: Math.round(text.right - stage.left), bottom: Math.round(text.bottom - stage.top) };
+      setCopy((old) => (old && old.right === next.right && old.bottom === next.bottom ? old : next));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (copyRef.current) observer.observe(copyRef.current);
+    if (interaction.current) observer.observe(interaction.current);
+    return () => observer.disconnect();
+  }, [stacked]);
   const [sceneMounted, setSceneMounted] = useState(false);
   const [dragging, setDragging] = useState(false),
     [ready, setReady] = useState(false);
@@ -551,6 +594,10 @@ function HeroPage() {
     const change = () => setReduced(query.matches);
     change();
     query.addEventListener("change", change);
+    const layout = matchMedia(STACKED);
+    const relayout = () => setStacked(layout.matches);
+    relayout();
+    layout.addEventListener("change", relayout);
     const onVisibility = () => {
       setTabVisible(!document.hidden);
       if (document.hidden) {
@@ -564,6 +611,7 @@ function HeroPage() {
     if (interaction.current) observer.observe(interaction.current);
     return () => {
       query.removeEventListener("change", change);
+      layout.removeEventListener("change", relayout);
       document.removeEventListener("visibilitychange", onVisibility);
       observer.disconnect();
     };
@@ -597,7 +645,7 @@ function HeroPage() {
       <div className="site-header" aria-hidden="true" />
       <main>
         <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-copy">
+          <div className="hero-copy" ref={copyRef}>
             <ScrambleLines as="h1" id="hero-title" className="hero-statement" lines={["See the real.", "Tell the story.", "Drive the change."]} />
             <ScrambleLines as="p" className="hero-statement hero-note" lines={["AI-powered housing insight", "for every city."]} />
           </div>
@@ -650,7 +698,7 @@ function HeroPage() {
               {sceneMounted && (
                 <SceneBoundary>
                   <Suspense fallback={null}>
-                    <LazyPlanetScene motion={motion} active={visible && tabVisible} reduced={reduced} onReady={setReady} />
+                    <LazyPlanetScene motion={motion} active={visible && tabVisible} reduced={reduced} stacked={stacked} copy={copy} onReady={setReady} />
                   </Suspense>
                 </SceneBoundary>
               )}
@@ -671,39 +719,59 @@ function HeroPage() {
   );
 }
 // ------------------------------------------------------------------ styles (scoped to .orbit-delivery), in violet
-const css = `@font-face{font-family:'Orbit Libre Caslon';font-style:normal;font-weight:400;font-display:swap;src:url('https://cdn.21st.dev/assets/mirror/d7/d7157ad1851673258b7bf8b9d16654e90ca5f2d687aa0c71506d83266e0a20a2.woff2') format('woff2')}
-.orbit-delivery{font-family:'DM Sans',sans-serif;color:#160e2b;background:#f8f6ff;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;font-weight:400;color-scheme:light}
-.orbit-delivery *{box-sizing:border-box}.orbit-delivery{margin:0}.orbit-delivery button,.orbit-delivery a{-webkit-tap-highlight-color:transparent}.orbit-delivery button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}.orbit-delivery button:disabled{cursor:default;opacity:.55}.orbit-delivery button:focus-visible,.orbit-delivery a:focus-visible{outline:2px solid #7c3aed;outline-offset:6px}.orbit-delivery a{color:inherit;text-decoration:none}.orbit-delivery svg{display:block}.orbit-delivery button svg{width:22px;height:22px}.orbit-delivery .page{height:100svh;min-height:760px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 6% 15%,#fffdfb 0%,#fcfbff 38%,#f3eeff 100%);display:flex;flex-direction:column}.orbit-delivery .explore-button:not(:disabled):hover{background:#6d28d9}.orbit-delivery main{flex:1;min-height:0;display:flex}.orbit-delivery .hero{width:100%;position:relative}.orbit-delivery .hero-copy{position:relative;z-index:3;margin-left:6.5%;padding-top:clamp(14px,3.4vh,46px);width:45%;pointer-events:none}.orbit-delivery .hero-copy button{pointer-events:auto}.orbit-delivery .eyebrow{text-transform:uppercase;letter-spacing:.36em;font-size:12px;font-weight:500;color:#8b5cf6;margin:0 0 21px}.orbit-delivery h1{font-size:clamp(66px,5.55vw,100px);font-weight:550;letter-spacing:-.064em;line-height:1.03;margin:0 0 26px}.orbit-delivery h1 em{font-family:'Orbit Libre Caslon',Georgia,serif;font-size:1.12em;font-weight:400;letter-spacing:-.035em;color:#7c3aed;line-height:.7}.orbit-delivery .hero-description{color:#7f7699;font-size:clamp(16px,1.25vw,21px);line-height:1.45;letter-spacing:-.3px;margin:0 0 30px}.orbit-delivery .explore-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:183px;padding:17px 29px;border-radius:32px;background:#7c3aed;color:white;font-size:16px;min-height:55px;box-shadow:inset 0 1px 0 #ffffff30,0 14px 30px -12px #7c3aed99;transition:background .2s,transform .2s}.orbit-delivery .explore-button:not(:disabled):hover{transform:translateY(-2px)}.orbit-delivery .explore-button:not(:disabled):active{transform:translateY(0)}.orbit-delivery .visual-column{position:absolute;left:0;right:0;top:0;width:100%;height:100%;z-index:1}.orbit-delivery .visual-column::before{content:'';position:absolute;inset:4% 2% 0 8%;background-image:linear-gradient(#7c3aed17 1px,transparent 1px),linear-gradient(90deg,#7c3aed17 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse at 50% 100%,#000 18%,transparent 62%);mask-image:radial-gradient(ellipse at 50% 100%,#000 18%,transparent 62%);pointer-events:none}.orbit-delivery .planet-stage{height:100%;width:100%;position:relative;cursor:grab;touch-action:none;user-select:none;outline:none}.orbit-delivery .planet-stage:focus-visible{outline:1px dashed #c4b5fd;outline-offset:-15px;border-radius:36px}.orbit-delivery .planet-stage.dragging{cursor:grabbing}.orbit-delivery .planet-caption{position:absolute;right:6.2%;top:17%;z-index:3;width:160px;pointer-events:none;color:#b7a8dc;transition:opacity .2s}.orbit-delivery .planet-caption p{font-size:15px;line-height:1.35;font-style:italic;text-align:right;margin:0}.orbit-delivery .planet-caption svg{width:160px;height:149px;margin-top:-17px;margin-left:-32px}.orbit-delivery .planet-caption.is-dragging{opacity:.6}.orbit-delivery .cloud-bank{position:absolute;z-index:2;inset:auto -12% -90px 24%;height:250px;pointer-events:none;filter:blur(17px);opacity:.95}.orbit-delivery .cloud-bank i{position:absolute;bottom:0;background:radial-gradient(ellipse at 42% 34%,#fffdfe 27%,#f6f2ff 59%,#ebe3fd88 75%,transparent 80%);border-radius:50%}.orbit-delivery .cloud-bank i:nth-child(1){width:390px;height:200px;left:0;bottom:-28px;transform:rotate(-25deg)}.orbit-delivery .cloud-bank i:nth-child(2){width:265px;height:195px;left:14%;bottom:32px}.orbit-delivery .cloud-bank i:nth-child(3){width:270px;height:170px;left:29%;bottom:-2px}.orbit-delivery .cloud-bank i:nth-child(4){width:350px;height:200px;right:7%;bottom:-20px}.orbit-delivery .cloud-bank i:nth-child(5){width:280px;height:215px;right:-2%;bottom:70px}.orbit-delivery .loading{position:absolute;top:42%;left:25%;right:20%;display:flex;align-items:center;justify-content:center;gap:12px;color:#9183c4;font-size:12px;pointer-events:none}.orbit-delivery .loading>span{width:17px;height:17px;border:1px solid #e4dcff;border-top-color:#8b5cf6;border-radius:50%;animation:loading 1.2s linear infinite}@keyframes loading{to{transform:rotate(360deg)}}.orbit-delivery .scene-fallback{position:absolute;inset:35% 20%;font-size:15px;text-align:center;color:#8475b4;z-index:5}.orbit-delivery .scene-fallback button{background:#7c3aed;border-radius:20px;color:white;padding:10px 20px}.orbit-delivery .about-dialog{border:1px solid #e6defa;border-radius:22px;padding:48px;max-width:510px;width:calc(100% - 32px);background:#fbf9ff;color:#160e2b;box-shadow:0 25px 120px #3c187326}.orbit-delivery .about-dialog::backdrop{background:#2e1a5c33;backdrop-filter:blur(8px)}.orbit-delivery .about-dialog h2{font-size:36px;font-weight:500;letter-spacing:-1.6px;line-height:1.15;margin:26px 0 22px}.orbit-delivery .about-dialog p{font-size:15px;line-height:1.75;color:#7f7699}.orbit-delivery .about-dialog .explore-button{margin-top:16px;font-size:14px}.orbit-delivery .close-dialog{position:absolute;right:20px;top:10px;font-size:30px;color:#9081bf}.orbit-delivery .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media(min-width:1800px){.orbit-delivery .hero-copy{padding-top:15vh}.orbit-delivery .page{min-height:950px}}
-@media(max-width:1150px){.orbit-delivery .hero-copy{margin-left:5%;padding-top:100px;width:48%}.orbit-delivery h1{font-size:65px}.orbit-delivery .hero-description{font-size:15px;max-width:370px}.orbit-delivery .planet-caption{right:4%;top:18%;width:115px}.orbit-delivery .planet-caption p{font-size:12px}.orbit-delivery .planet-caption svg{width:130px;margin-left:-24px}.orbit-delivery .page{min-height:760px}.orbit-delivery .explore-button{font-size:15px;min-width:168px}}
-@media(max-width:759px){.orbit-delivery .page{height:auto;min-height:100svh}.orbit-delivery main{display:block}.orbit-delivery .hero{display:flex;flex-direction:column}.orbit-delivery .hero-copy{width:calc(100% - 50px);margin:0 25px;padding-top:8px;pointer-events:auto}.orbit-delivery .eyebrow{font-size:9px;letter-spacing:.33em;margin-bottom:18px}.orbit-delivery h1{font-size:clamp(54px,12vw,80px);margin-bottom:23px;line-height:1.025}.orbit-delivery .hero-description{font-size:15px;line-height:1.6;max-width:340px;margin-bottom:24px}.orbit-delivery .desktop-break{display:none}.orbit-delivery .explore-button{padding:15px 24px;min-height:51px;min-width:163px;font-size:14px}.orbit-delivery .visual-column{position:relative;width:100%;left:0;height:clamp(360px,90vw,560px);margin-top:12px}.orbit-delivery .planet-caption{top:auto;bottom:290px;right:18px;width:96px}.orbit-delivery .planet-caption p{font-size:11px}.orbit-delivery .planet-caption svg{width:92px;height:94px;margin-left:-13px;margin-top:-3px}.orbit-delivery .cloud-bank{left:-20%;right:-20%;height:185px;bottom:-50px;filter:blur(14px)}.orbit-delivery .cloud-bank i:nth-child(1){width:210px;height:140px;left:-10%;bottom:12px}.orbit-delivery .cloud-bank i:nth-child(2){width:170px;height:150px;left:10%;bottom:-32px}.orbit-delivery .cloud-bank i:nth-child(3){width:180px;height:130px;left:35%;bottom:-35px}.orbit-delivery .cloud-bank i:nth-child(4){width:210px;height:160px;right:-5%;bottom:-5px}.orbit-delivery .cloud-bank i:nth-child(5){width:120px;height:120px;right:8%;bottom:0}.orbit-delivery .about-dialog{padding:35px}.orbit-delivery .about-dialog h2{font-size:31px}}
-@media(prefers-reduced-motion:reduce){.orbit-delivery *,.orbit-delivery *::before,.orbit-delivery *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}.orbit-delivery .explore-button:not(:disabled):hover{transform:none}}.orbit-delivery .hero-copy h1 em{line-height:.92}.orbit-delivery .hero-copy .explore-button{gap:13px}
-.orbit-delivery{width:100%;isolation:isolate;--orbit-bg:radial-gradient(ellipse at 6% 15%,#fffdfb 0%,#fcfbff 38%,#f3eeff 100%);--orbit-ink:#160e2b;--orbit-muted:#7f7699;--orbit-nav:#5b4d83;--orbit-accent:#7c3aed;--orbit-cloud:.55;color:var(--orbit-ink)}
-:is(.dark,[data-theme="dark"]) .orbit-delivery:not([data-theme="light"]),.orbit-delivery[data-theme="dark"]{--orbit-bg:radial-gradient(ellipse at 6% 15%,#1d1532 0%,#120d26 50%,#1a1038 100%);--orbit-ink:#f6f3ff;--orbit-muted:#c0b0d9;--orbit-nav:#cfc2e8;--orbit-accent:#b69cff;--orbit-cloud:.14;color-scheme:dark}
-.orbit-delivery .page{background:var(--orbit-bg);color:var(--orbit-ink)}
-.orbit-delivery .hero-description,.orbit-delivery .about-dialog p{color:var(--orbit-muted)}
-.orbit-delivery h1 em{color:var(--orbit-accent)}
-.orbit-delivery .cloud-bank{opacity:var(--orbit-cloud)}
-.orbit-delivery .about-dialog{background:var(--orbit-bg);color:var(--orbit-ink)}
-.orbit-delivery h1{font-family:inherit}
-/* Caption type: small tracked capitals, used for every line of words on the page. */
-.orbit-delivery{--orbit-caption:#a596d1;--orbit-caption-mid:#7a69b5;--orbit-caption-strong:#3b2d6b;--orbit-rule:#c2b5e0}
-:is(.dark,[data-theme="dark"]) .orbit-delivery:not([data-theme="light"]),.orbit-delivery[data-theme="dark"]{--orbit-caption-mid:#c0b0d9;--orbit-caption-strong:#f6f3ff;--orbit-rule:#5a4a8a}
-.orbit-delivery h1.hero-statement::before{content:'';display:block;width:25px;height:1px;background:var(--orbit-rule);margin-bottom:14px}
-.orbit-delivery h1.hero-statement::before{margin-bottom:22px}
-.orbit-delivery .hero-statement{font-size:clamp(14px,1.12vw,17px);font-weight:500;text-transform:uppercase;letter-spacing:.25em;line-height:1.9;color:var(--orbit-caption-strong);margin:0}
-.orbit-delivery .hero-note{font-weight:400;color:var(--orbit-caption-mid);margin-top:1.15em}
-.orbit-delivery .loading{font-size:10px;text-transform:uppercase;letter-spacing:.25em}
-/* With a mouse, the crosshair's square (ui/cursor-crosshair.tsx) is the pointer over the globe. */
-@media(hover:hover) and (pointer:fine){.orbit-delivery .planet-stage,.orbit-delivery .planet-stage.dragging{cursor:none}}
-@media(max-width:759px){.orbit-delivery h1.hero-statement::before{width:20px;margin-bottom:16px}.orbit-delivery .hero-statement{font-size:12px;letter-spacing:.2em}}
-/* Phones: the globe's stage takes whatever height is left, so the hero fills the screen with no empty band below it. */
-@media(max-width:759px){.orbit-delivery main{display:flex}.orbit-delivery .hero{flex:1}.orbit-delivery .visual-column{flex:1;height:auto;min-height:clamp(360px,90vw,560px)}}
+// Two layouts, chosen by the screen's shape, not by a device list:
+//  - Landscape (the default): one screen tall. The slogan lies over the top left of the stage, the globe is a horizon.
+//  - Stacked (portrait, or narrower than 540 px): header, slogan, then the stage takes all the height that is left.
+// Sizes that must agree with the site header come from src/styles.css: --header-h and --gutter.
+const css = `
+.orbit-delivery{width:100%;isolation:isolate;font-family:'DM Sans',sans-serif;font-weight:400;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;color-scheme:light;
+  --orbit-bg:radial-gradient(ellipse at 6% 15%,#fffdfb 0%,#fcfbff 38%,#f3eeff 100%);--orbit-ink:#160e2b;--orbit-caption-mid:#7a69b5;--orbit-caption-strong:#3b2d6b;--orbit-rule:#c2b5e0;color:var(--orbit-ink)}
+:is(.dark,[data-theme="dark"]) .orbit-delivery:not([data-theme="light"]),.orbit-delivery[data-theme="dark"]{--orbit-bg:radial-gradient(ellipse at 6% 15%,#1d1532 0%,#120d26 50%,#1a1038 100%);--orbit-ink:#f6f3ff;--orbit-caption-mid:#c0b0d9;--orbit-caption-strong:#f6f3ff;--orbit-rule:#5a4a8a;color-scheme:dark}
+.orbit-delivery *{box-sizing:border-box}
+.orbit-delivery button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.orbit-delivery button:focus-visible{outline:2px solid #7c3aed;outline-offset:6px}
+
+/* ---- landscape: slogan over the stage */
+.orbit-delivery .page{position:relative;overflow:hidden;display:flex;flex-direction:column;height:100svh;min-height:320px;background:var(--orbit-bg);color:var(--orbit-ink)}
 .orbit-delivery .site-header{height:var(--header-h);flex:none}
-/* The slogan takes the pointer (its hover plays the scramble); the rest of the copy block lets drags through to the globe. */
-.orbit-delivery .hero-statement{pointer-events:auto;width:fit-content;cursor:default}
+.orbit-delivery main{flex:1;min-height:0;display:flex}
+.orbit-delivery .hero{width:100%;position:relative}
+.orbit-delivery .hero-copy{position:relative;z-index:3;width:fit-content;max-width:calc(100% - 2 * var(--gutter));margin-left:var(--gutter);padding-top:clamp(4px,3.4vh,46px);pointer-events:none}
+.orbit-delivery .visual-column{position:absolute;inset:0;z-index:1}
+.orbit-delivery .visual-column::before{content:'';position:absolute;inset:4% 2% 0 8%;background-image:linear-gradient(#7c3aed17 1px,transparent 1px),linear-gradient(90deg,#7c3aed17 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse at 50% 100%,#000 18%,transparent 62%);mask-image:radial-gradient(ellipse at 50% 100%,#000 18%,transparent 62%);pointer-events:none}
+.orbit-delivery .planet-stage{height:100%;width:100%;position:relative;cursor:grab;touch-action:none;user-select:none;outline:none}
+.orbit-delivery .planet-stage:focus-visible{outline:1px dashed #c4b5fd;outline-offset:-15px;border-radius:36px}
+.orbit-delivery .planet-stage.dragging{cursor:grabbing}
+
+/* ---- the slogan. Caption type: small tracked capitals. The size follows the screen's shorter side, so a phone on its
+   side gets the small size and a tablet either way round gets a middle one. */
+.orbit-delivery .hero-statement{margin:0;width:fit-content;font-size:clamp(12px,calc(1.5vmin + 4px),17px);font-weight:500;text-transform:uppercase;letter-spacing:.25em;line-height:1.9;color:var(--orbit-caption-strong);pointer-events:auto;cursor:default}
+.orbit-delivery h1.hero-statement{font-family:inherit}
+.orbit-delivery h1.hero-statement::before{content:'';display:block;width:1.6em;height:1px;background:var(--orbit-rule);margin-bottom:1.35em}
+.orbit-delivery .hero-note{font-weight:400;color:var(--orbit-caption-mid);margin-top:1.15em}
 .orbit-delivery .scramble-line{display:block;white-space:nowrap}
-@media(hover:hover) and (pointer:fine){.orbit-delivery .hero-statement{cursor:none}}
+/* With a mouse, the crosshair's square (ui/cursor-crosshair.tsx) is the pointer over the globe and the slogan. */
+@media(hover:hover) and (pointer:fine){.orbit-delivery .planet-stage,.orbit-delivery .planet-stage.dragging,.orbit-delivery .hero-statement{cursor:none}}
+/* A phone on its side, or a low window: tighter lines, so slogan and globe both fit in one short screen. */
+@media(max-height:520px) and (orientation:landscape){.orbit-delivery .hero-statement{line-height:1.65}.orbit-delivery .hero-note{margin-top:.8em}.orbit-delivery h1.hero-statement::before{margin-bottom:.9em}}
+
+/* ---- stacked: slogan, then the stage fills what is left (never less than a usable globe) */
+@media(orientation:portrait),(max-width:539px){
+  .orbit-delivery .page{height:auto;min-height:100svh}
+  .orbit-delivery .hero{display:flex;flex-direction:column}
+  .orbit-delivery .hero-copy{padding-top:clamp(6px,2.4vh,40px)}
+  .orbit-delivery .visual-column{position:relative;inset:auto;flex:1;min-height:clamp(250px,76vw,640px);margin-top:clamp(8px,2vh,28px)}
+  .orbit-delivery .visual-column::before{inset:0 0 0 0}
+}
+@media(max-width:539px){.orbit-delivery .hero-statement{letter-spacing:.2em}}
+
+.orbit-delivery .loading{position:absolute;top:42%;left:20%;right:20%;display:flex;align-items:center;justify-content:center;gap:12px;color:#9183c4;font-size:10px;text-transform:uppercase;letter-spacing:.25em;pointer-events:none}
+.orbit-delivery .loading>span{width:17px;height:17px;border:1px solid #e4dcff;border-top-color:#8b5cf6;border-radius:50%;animation:loading 1.2s linear infinite}
+@keyframes loading{to{transform:rotate(360deg)}}
+.orbit-delivery .scene-fallback{position:absolute;inset:35% 20%;font-size:15px;text-align:center;color:#8475b4;z-index:5}
+.orbit-delivery .scene-fallback button{background:#7c3aed;border-radius:20px;color:white;padding:10px 20px}
+.orbit-delivery .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(prefers-reduced-motion:reduce){.orbit-delivery *,.orbit-delivery *::before,.orbit-delivery *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 `;
 
 /** The start page's hero: the slogan and the globe. The site header is laid over it by App.tsx. */

@@ -11,7 +11,7 @@ Every page except the map tool has the same header in the same place (`SiteHeade
 | Start page | A full-height Orbit hero under the site header. The slogan sits at the top left, and the data globe rises from the bottom. No map. On a phone the globe is as wide as the screen and nearly all of it shows. |
 | Insights | A title, then one row per dataset (a hover photo follows the cursor). No footer. |
 | Coming soon | Before launch, in place of the map and Insights: a large violet thinking orb (240 px), a small "Superloading…" and one small line, centered. No footer. |
-| Subscribe pop-up | One rounded card over a blurred page: a title, three facts in words, four rounded bars that spring up and lift on hover, a caption under them that names and describes the bar pointed at (their heights are not figures, so no percentages show), a legend, and the email form. Nothing floats outside the card. Before launch it reads "Wait for the launch", beside a rocket that lifts off and returns on a loop. |
+| Subscribe pop-up | One rounded card over a blurred page: a title, three facts in words, four rounded bars that spring up and lift on hover, a caption under them that names and describes the bar pointed at (their heights are not figures, so no percentages show), a legend, the email form, and a join button that morphs with the request (spinner, then a green check with a burst of dots, or a red X and a shake). Nothing floats outside the card. Before launch it reads "Wait for the launch", beside a rocket that lifts off and returns on a loop. |
 | Map (wide) | Full-bleed map. Top-left: Home and the brand. Left: the floating **Data** panel (Datasets and Settings sections, VisionPitts switches); it folds into a tab. Top-right: **Ask the map**, with the **Details** panel under it, which also folds. Bottom-left: the legend. Top-center: a dark hint pill until a dataset is on. |
 | Map (phone) | The Data panel on top (40% height at most), the chat box and Details as a sheet along the bottom, and map zoom buttons hidden. |
 
@@ -26,6 +26,18 @@ Every page except the map tool has the same header in the same place (`SiteHeade
 - **The copy** is the slogan under a short rule: "See the real. Tell the story. Drive the change." and, below it, "AI-powered housing insight for every city." Each line settles out of random capitals when the page opens, and again whenever the pointer comes onto it (`ui/text-scramble.tsx`); the slogan is in deep violet and the second line in a lighter one.
 - **Caption type.** Every line of words on the start page is set as a caption: small capitals, tracked 0.25em, with a line height near 1.9, in lavender. That covers the statement (14–17 px), the header links and the Subscribe label (11 px), and the loading note (10 px). The brand name is the one exception.
 - **The Subscribe button** is a clear pill with a hairline violet edge, upright (`ui/3d-button.tsx`, styles under `.sub3d` in `src/styles.css`). On hover its letters roll over one by one, a light runs round the edge and the arrow swings. A press splashes short lines outward. After a click the outline draws itself and the label changes to "Join us" while the button keeps focus. Once subscribed it is a still "Subscribed ✓". On phones the two links drop to their own row under the name so the button stays on screen.
+
+## Screen sizes
+
+The layout follows the screen's shape, not a list of devices. It was checked from 320×568 to 2560×1080, phones and tablets both ways round.
+
+- **Start page, landscape** (desktops, tablets and phones held sideways): one screen tall. The slogan lies over the top left; the globe is a horizon on the bottom edge, centered and wide when there is room. The globe measures the slogan and keeps clear of it: on a low or narrow screen it shrinks and slides to the right (`globeLayout` in `ui/orbit-delivery-hero.tsx`).
+- **Start page, stacked** (any portrait screen, or narrower than 540 px): header, slogan, then the globe takes all the height that is left, as wide as the screen, nearly all of it showing.
+- **Slogan size** follows the screen's shorter side (12 px on a phone, about 15 px on a tablet, 17 px on a desktop).
+- **Header:** one row from 540 px up; below that the two links take their own row. It is slimmer on a phone held sideways.
+- **Coming soon:** the orb is about two fifths of the screen's shorter side (120–240 px). On a phone held sideways the orb and the words sit side by side.
+- **Subscribe pop-up:** it never clips. Taller than the screen, it starts at the top and scrolls. On a phone held sideways it becomes two columns. The email field is 16 px on phones (iOS zooms the page for anything smaller) and is not focused automatically on touch screens, so the keyboard doesn't cover the card.
+- Nothing scrolls sideways at any size (the header clips the Subscribe button's splash).
 
 ## Tokens (`src/styles.css`, same values as VisionPitts)
 

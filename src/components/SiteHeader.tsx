@@ -16,12 +16,13 @@ export default function SiteHeader({ current }: { current?: 'map' | 'updates' })
   const subscribed = useApp((s) => s.subscribed);
   return (
     // Only the name, links and button take the pointer; the rest lets it through to the page (the globe's crosshair).
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-[var(--header-h)] items-center justify-between px-[6.5%] max-[1150px]:px-[5%] max-[759px]:flex-wrap max-[759px]:content-start max-[759px]:px-[25px] max-[759px]:pt-6">
+    // Clipped sideways: the button's press splash is wider than the button and must not widen a phone's page.
+    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-[var(--header-h)] overflow-x-clip items-center justify-between px-[var(--gutter)] max-[539px]:flex-wrap max-[539px]:content-start max-[539px]:pt-6">
       <a href="/" onClick={linkClick} className="pointer-events-auto" aria-label={`${site.title} home`}>
-        <BrandMark name={site.title} className="text-[27px] font-semibold tracking-[-1.2px] text-[#160e2b] max-[1150px]:text-2xl max-[759px]:text-[22px]" />
+        <BrandMark name={site.title} className="text-[27px] font-semibold tracking-[-1.2px] text-[#160e2b] max-[1150px]:text-2xl max-[539px]:text-[22px]" />
       </a>
       <nav
-        className="absolute left-1/2 flex -translate-x-1/2 items-center gap-[42px] text-[11px] uppercase tracking-[0.25em] max-[1150px]:gap-6 max-[1150px]:text-[10px] max-[759px]:static max-[759px]:order-3 max-[759px]:mt-2 max-[759px]:w-full max-[759px]:translate-x-0 max-[759px]:text-[9px] max-[759px]:tracking-[0.22em]"
+        className="absolute left-1/2 flex -translate-x-1/2 items-center gap-[42px] text-[11px] uppercase tracking-[0.25em] max-[1150px]:gap-6 max-[1150px]:text-[10px] max-[539px]:static max-[539px]:order-3 max-[539px]:mt-2 max-[539px]:w-full max-[539px]:translate-x-0 max-[539px]:tracking-[0.22em]"
         aria-label="Main navigation"
       >
         <a

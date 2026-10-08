@@ -6,6 +6,8 @@
   --radius: 0.75rem;
   /* Height of the site header (SiteHeader.tsx); every page leaves this much room at the top. */
   --header-h: 104px;
+  /* Side margin of the header and the pages under it. */
+  --gutter: max(6.5%, env(safe-area-inset-left), env(safe-area-inset-right));
   --background: #fbfaf8;
   --foreground: #0f172a;
   --card: #ffffff;
@@ -26,17 +28,28 @@
   --destructive-foreground: #ffffff;
 }
 
+/* The header's height and the page's side margin step down with the width. Both also respect a phone's notch. */
 @media (max-width: 1150px) {
   :root {
     --header-h: 90px;
+    --gutter: max(5%, env(safe-area-inset-left), env(safe-area-inset-right));
   }
 }
-/* Phones: the two links sit on their own row under the name and the button. */
-@media (max-width: 759px) {
+/* Narrow phones: the two links sit on their own row under the name and the button. */
+@media (max-width: 539px) {
   :root {
     --header-h: 112px;
+    --gutter: max(25px, env(safe-area-inset-left), env(safe-area-inset-right));
   }
 }
+/* A phone on its side, or a low window: a slim one-row header. */
+@media (max-height: 520px) and (orientation: landscape) and (min-width: 540px) {
+  :root {
+    --header-h: 64px;
+  }
+}
+/* `short:` styles for that same case (a wide screen with little height). */
+@custom-variant short (@media (max-height: 520px) and (orientation: landscape));
 
 @theme inline {
   --color-background: var(--background);
@@ -531,8 +544,8 @@ body {
   }
   .sub3d .sub3d-content {
     gap: 8px;
-    font-size: 9px;
-    letter-spacing: 0.2em;
+    font-size: 10px;
+    letter-spacing: 0.18em;
   }
 }
 @keyframes sub3d-spin {

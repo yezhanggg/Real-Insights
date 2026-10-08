@@ -2,7 +2,8 @@
 // hover, and a legend. Changes: Motion instead of framer-motion; `children` go under the legend (the Subscribe form
 // lives there); `showValues={false}` leaves the percentages out, for bars that are there to be looked at, not read as
 // measurements; a bar's name and description show in a caption under the bars, inside the card, where the template
-// had a tooltip floating over it; and the grey panel behind the bars is gone.
+// had a tooltip floating over it; the grey panel behind the bars is gone; and on a short wide screen (a phone on
+// its side) the card lays out in two columns, facts and bars beside `children`, with the legend left out.
 import * as React from 'react';
 import { AnimatePresence, motion, type Variants } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -58,19 +59,21 @@ export const HealthStatCard = React.forwardRef<HTMLDivElement, HealthStatCardPro
     return (
       <div ref={ref} className={cn('w-full max-w-md rounded-2xl border bg-card p-6 text-card-foreground shadow-sm', className)} {...props}>
         {/* Header */}
-        <div className="mb-5 flex items-center gap-3">
+        <div className="mb-5 flex items-center gap-3 pr-10 short:mb-3">
           {headerIcon && <div className="text-primary">{headerIcon}</div>}
           <h2 id={titleId} className="text-lg font-semibold tracking-tight">
             {title}
           </h2>
         </div>
 
+        <div className="short:grid short:grid-cols-2 short:items-center short:gap-x-8">
+        <div>
         {/* Stats */}
-        <div className="mb-6 grid grid-cols-3 gap-4 text-center">
+        <div className="mb-6 grid grid-cols-3 gap-4 text-center short:mb-4">
           {stats.map((item, i) => (
             <div key={i}>
               <div className="flex items-baseline justify-center gap-1">
-                <p className="text-2xl font-bold">{item.value}</p>
+                <p className="text-2xl font-bold max-[380px]:text-xl">{item.value}</p>
                 {item.unit && <span className="text-sm text-muted-foreground">{item.unit}</span>}
               </div>
               <p className="text-xs text-muted-foreground">{item.title}</p>
@@ -86,7 +89,7 @@ export const HealthStatCard = React.forwardRef<HTMLDivElement, HealthStatCardPro
         {/* Animated graph, with its caption under the bars. No tinted panel behind it: the bars stand on the card. */}
         {graphData && current && (
           <div>
-            <motion.div className={cn('flex w-full items-end gap-2', barMaxWidth ? 'justify-around' : 'justify-between')} variants={containerVariants} initial="hidden" animate="visible" style={{ height: graphHeight }}>
+            <motion.div className={cn('flex w-full items-end gap-2 short:h-16!', barMaxWidth ? 'justify-around' : 'justify-between')} variants={containerVariants} initial="hidden" animate="visible" style={{ height: graphHeight }}>
               {graphData.map((bar, i) => (
                 <motion.button
                   key={i}
@@ -123,7 +126,7 @@ export const HealthStatCard = React.forwardRef<HTMLDivElement, HealthStatCardPro
 
         {/* Legend */}
         {showLegend && graphData && (
-          <div className="mt-6">
+          <div className="mt-6 short:hidden">
             <h4 className="mb-2 text-sm font-medium text-muted-foreground">{legendTitle}</h4>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {graphData.map((item, i) => (
@@ -136,7 +139,9 @@ export const HealthStatCard = React.forwardRef<HTMLDivElement, HealthStatCardPro
           </div>
         )}
 
-        {children}
+        </div>
+        <div>{children}</div>
+        </div>
       </div>
     );
   },

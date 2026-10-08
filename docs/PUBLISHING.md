@@ -99,6 +99,8 @@ popup:
 | `data` | open the map; turning on a dataset or downloading goes to Subscribe first |
 | `off` | see everything |
 
+`launched: false` is the pre-launch state: "Explore map" and "Insights" show the Coming soon page and Subscribe is a wait-list. Set it to `true` to open them (also locally, while you work on a dataset).
+
 It's a friendly ask, not security: the data files are public, and the agent can still talk about everything. After one sign-up, the browser remembers and never asks again.
 
 ## Before you hit deploy

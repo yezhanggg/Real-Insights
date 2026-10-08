@@ -20,7 +20,7 @@ const monthYear = (iso: string | null) => (iso ? `${MONTHS[Number(iso.slice(5, 7
 
 export default function Updates() {
   useEffect(() => {
-    document.title = `Release updates · ${site.title}`;
+    document.title = `Insights · ${site.title}`;
   }, []);
   const items: ShowcaseItem[] = layers.map((l, i) => ({
     title: l.title,
@@ -35,7 +35,7 @@ export default function Updates() {
     <div className="min-h-full bg-[radial-gradient(ellipse_at_6%_0%,#fffdfb_0%,#fcfbff_40%,#f6f2ff_100%)]">
       <SiteHeader current="updates" />
       <main className="mx-auto max-w-2xl px-6 pt-10">
-        <p className="text-xs font-medium uppercase tracking-[0.36em] text-violet-500">Release updates</p>
+        <p className="text-xs font-medium uppercase tracking-[0.36em] text-violet-500">Insights</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">Every dataset, as it lands.</h1>
         <p className="mt-4 text-lg text-[#7f7699]">New data goes on the live map as it's ready. Hover a release for a preview; open it to see it on the map.</p>
       </main>

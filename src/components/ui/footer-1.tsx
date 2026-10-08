@@ -15,7 +15,7 @@ const footerSections: FooterSection[] = [
     title: 'Explore',
     links: [
       { label: 'Explore map', href: '/map', onClick: (e) => (e.preventDefault(), exploreMap()) },
-      { label: 'Release updates', href: '/updates', onClick: inApp },
+      { label: 'Insights', href: '/updates', onClick: inApp },
       { label: 'Ask the map', href: '/map', onClick: (e) => (e.preventDefault(), exploreMap()) },
     ],
   },
@@ -54,7 +54,7 @@ export function SiteFooter() {
             </a>
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">{site.tagline}</p>
             <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-              <p>Get new data by email:</p>
+              <p>{site.launched ? 'Get new data by email:' : 'Get one email on launch day:'}</p>
               <SubscribeForm />
             </div>
           </div>

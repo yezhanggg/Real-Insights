@@ -7,6 +7,9 @@
   --background: #fbfaf8;
   --foreground: #0f172a;
   --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
   --primary: rgb(124 58 237);
   --primary-foreground: #ffffff;
   --muted: #f1efec;
@@ -27,6 +30,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-muted: var(--muted);
@@ -228,64 +234,350 @@ body {
   }
 }
 
-/* ------------------------------------------------------------ Subscribe page entrances (from the sign-in template) */
-@keyframes fadeSlideIn {
-  to {
-    opacity: 1;
-    filter: blur(0px);
-    transform: translateY(0px);
+/* ------------------------------------------------------------ Tooltip entrance (ui/tooltip.tsx) */
+.tooltip-in {
+  animation: tooltip-in 0.16s ease-out;
+}
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
   }
 }
-@keyframes slideRightIn {
-  to {
-    opacity: 1;
-    filter: blur(0px);
-    transform: translateX(0px);
+
+/* ------------------------------------------------------------ Subscribe button (ui/3d-button.tsx)
+   The 21st.dev "3d-button" with its slab, shadow and tilt taken away: a clear pill with a hairline edge. What is kept
+   is how it moves. Type and color sit on .sub3d-content because the start page resets `button` itself. */
+.sub3d {
+  --sub3d-ink: #6d28d9;
+  --sub3d-light: #7c3aed;
+  --sub3d-edge: rgb(124 58 237 / 0.26);
+  position: relative;
+  flex: none;
+  width: 160px;
+  aspect-ratio: 160 / 44;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sub3d:focus-visible {
+  outline: 2px solid var(--sub3d-light);
+  outline-offset: 5px;
+}
+.sub3d .sub3d-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--sub3d-edge);
+  transition:
+    transform 0.25s ease,
+    background-color 0.3s ease;
+}
+.sub3d .sub3d-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  pointer-events: none;
+  color: var(--sub3d-ink);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+/* A light that runs round the edge on hover: a turning beam, masked down to the 1px ring. */
+.sub3d .sub3d-outline {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  padding: 1px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+.sub3d .sub3d-outline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 320px;
+  margin: -160px 0 0 -32px;
+  background: linear-gradient(to right, transparent, var(--sub3d-light), transparent);
+  animation: sub3d-spin 3s linear infinite paused;
+}
+/* Letters. Each span holds its letter's width; ::after draws it, and ::before is a second copy waiting above. */
+.sub3d .sub3d-labels {
+  display: grid;
+}
+.sub3d .sub3d-char {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sub3d .sub3d-char span {
+  position: relative;
+  display: block;
+  color: transparent;
+}
+.sub3d .sub3d-char span::before,
+.sub3d .sub3d-char span::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 0;
+  color: var(--sub3d-ink);
+}
+.sub3d .sub3d-char span::before {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+.sub3d .sub3d-state-1 span {
+  animation: sub3d-char-in 1.2s ease backwards calc(var(--i) * 0.03s);
+}
+.sub3d .sub3d-state-2 span::before {
+  content: none;
+}
+.sub3d .sub3d-state-2 span::after {
+  opacity: 0;
+}
+/* The arrow: a shaft and two short strokes for the head. */
+.sub3d .sub3d-icon span {
+  position: relative;
+  display: block;
+  width: 15px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--sub3d-ink);
+  animation: sub3d-swing 1s ease-in-out infinite paused;
+}
+.sub3d .sub3d-icon span::before,
+.sub3d .sub3d-icon span::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  width: 7px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--sub3d-ink);
+  transform-origin: center right;
+}
+.sub3d .sub3d-icon span::before {
+  top: 0;
+  transform: rotate(44deg);
+  animation: sub3d-head-a 1s linear infinite paused;
+}
+.sub3d .sub3d-icon span::after {
+  bottom: 0;
+  transform: rotate(316deg);
+  animation: sub3d-head-b 1s linear infinite paused;
+}
+.sub3d .sub3d-path {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  stroke: var(--sub3d-light);
+  stroke-width: 1.5;
+  stroke-dasharray: 34 110;
+  /* A little past its own length, so the round cap doesn't peek out at the start. */
+  stroke-dashoffset: 38;
+}
+.sub3d .sub3d-splash {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 158%;
+  height: auto;
+  aspect-ratio: 342 / 208;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  stroke: var(--sub3d-light);
+  stroke-dasharray: 60 60;
+  stroke-dashoffset: 60;
+  opacity: 0.55;
+}
+.sub3d .sub3d-splash-go {
+  animation: sub3d-splash 0.8s cubic-bezier(0.3, 0, 0, 1) forwards 0.05s;
+}
+.sub3d .sub3d-check {
+  width: 13px;
+  height: 13px;
+}
+
+/* Hover: the letters roll over, the light runs round the edge, the arrow swings. */
+.sub3d:not(:disabled):hover .sub3d-wrap {
+  background-color: rgb(124 58 237 / 0.06);
+}
+.sub3d:not(:disabled):hover .sub3d-outline {
+  opacity: 1;
+}
+.sub3d:hover .sub3d-outline::before,
+.sub3d:hover .sub3d-icon span,
+.sub3d:hover .sub3d-icon span::before,
+.sub3d:hover .sub3d-icon span::after {
+  animation-play-state: running;
+}
+.sub3d:hover .sub3d-state-1 span::before {
+  animation: sub3d-char-in 0.7s ease calc(var(--i) * 0.03s);
+}
+.sub3d:hover .sub3d-state-1 span::after {
+  animation: sub3d-char-out 0.7s ease calc(var(--i) * 0.03s);
+}
+/* Press. */
+.sub3d:not(:disabled):active .sub3d-wrap {
+  transform: scale(0.96);
+}
+/* After a click (while it keeps focus): the outline draws itself, the arrow loops round, the label changes. */
+.sub3d:focus .sub3d-path {
+  animation: sub3d-path 1.6s ease forwards 0.2s;
+}
+.sub3d:focus .sub3d-icon {
+  animation: sub3d-arrow 1s cubic-bezier(0.7, -0.5, 0.3, 1.5) forwards;
+}
+.sub3d:focus .sub3d-state-1 span {
+  animation: sub3d-char-out 0.5s ease forwards calc(var(--i) * 0.03s);
+}
+.sub3d:focus .sub3d-state-2 span::after {
+  opacity: 1;
+  animation: sub3d-char-in 1s ease backwards calc(0.15s + var(--i) * 0.03s);
+}
+/* Already subscribed: quiet and still. */
+.sub3d.sub3d:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.sub3d:disabled .sub3d-wrap {
+  box-shadow: inset 0 0 0 1px rgb(124 58 237 / 0.14);
+}
+.sub3d:disabled .sub3d-content {
+  gap: 7px;
+  color: rgb(109 40 217 / 0.7);
+}
+@media (max-width: 759px) {
+  .sub3d {
+    width: 128px;
+  }
+  .sub3d .sub3d-content {
+    gap: 8px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
   }
 }
-@keyframes testimonialIn {
+@keyframes sub3d-spin {
   to {
-    opacity: 1;
-    filter: blur(0px);
-    transform: translateY(0px) scale(1);
+    transform: rotate(360deg);
   }
 }
-.animate-element {
-  opacity: 0;
-  filter: blur(4px);
-  transform: translateY(14px);
-  animation: fadeSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+@keyframes sub3d-char-in {
+  0% {
+    transform: translateY(50%);
+    opacity: 0;
+    filter: blur(6px);
+  }
+  20% {
+    transform: translateY(70%);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-15%);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
-.animate-slide-right {
-  opacity: 0;
-  filter: blur(6px);
-  transform: translateX(28px);
-  animation: slideRightIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+@keyframes sub3d-char-out {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-70%);
+    opacity: 0;
+    filter: blur(3px);
+  }
 }
-.animate-testimonial {
-  opacity: 0;
-  filter: blur(4px);
-  transform: translateY(18px) scale(0.96);
-  animation: testimonialIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+@keyframes sub3d-swing {
+  50% {
+    transform: translateX(4px) scale(0.9);
+  }
 }
-.animate-delay-100 { animation-delay: 0.1s; }
-.animate-delay-200 { animation-delay: 0.2s; }
-.animate-delay-300 { animation-delay: 0.3s; }
-.animate-delay-400 { animation-delay: 0.4s; }
-.animate-delay-500 { animation-delay: 0.5s; }
-.animate-delay-600 { animation-delay: 0.6s; }
-.animate-delay-700 { animation-delay: 0.7s; }
-.animate-delay-800 { animation-delay: 0.8s; }
-.animate-delay-900 { animation-delay: 0.9s; }
-.animate-delay-1000 { animation-delay: 1s; }
-.animate-delay-1200 { animation-delay: 1.2s; }
-.animate-delay-1400 { animation-delay: 1.4s; }
+@keyframes sub3d-head-a {
+  50% {
+    transform: rotate(30deg);
+  }
+  80% {
+    transform: rotate(55deg);
+  }
+}
+@keyframes sub3d-head-b {
+  50% {
+    transform: rotate(330deg);
+  }
+  80% {
+    transform: rotate(300deg);
+  }
+}
+@keyframes sub3d-arrow {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(26px);
+    opacity: 0;
+  }
+  51% {
+    transform: translateX(-26px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes sub3d-path {
+  from {
+    stroke: #c4b5fd;
+  }
+  to {
+    stroke-dashoffset: -104;
+    stroke: var(--sub3d-light);
+  }
+}
+@keyframes sub3d-splash {
+  to {
+    stroke-dasharray: 2 60;
+    stroke-dashoffset: -60;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .animate-element,
-  .animate-slide-right,
-  .animate-testimonial {
-    opacity: 1;
-    filter: none;
-    transform: none;
+  .sub3d *,
+  .sub3d *::before,
+  .sub3d *::after {
+    animation: none !important;
+  }
+  .sub3d .sub3d-state-2 {
+    display: none;
   }
 }

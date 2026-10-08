@@ -1,26 +1,24 @@
-// The Subscribe pop-up, built from the 21st.dev "sign-in" design: the form on the left, a city photo with a floating
-// card on the right, blur-in entrances. Email only (no accounts, no passwords).
+// The Subscribe pop-up: one card (the 21st.dev "health-stat-card") with the email form under its legend. Email only
+// (no accounts, no passwords). Before launch (`launched: false` in content/site.yaml) it is a wait-list: put down an
+// email and wait for the launch. Its three facts are words, and its bars carry no figures; they name what is coming.
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { BadgeCheck, Check, Mail, Map as MapIcon, X } from 'lucide-react';
+import { Check, Mail, MapPinned, Rocket, X } from 'lucide-react';
 import { site } from '@/lib/content';
 import { navigate } from '@/lib/router';
 import { useApp } from '@/lib/store';
 import { closeSubscribe, useSubscribe } from '@/lib/subscribe';
+import { HealthStatCard, type HealthGraphData, type StatData } from './health-stat-card';
 
-const HERO = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200&q=80&auto=format&fit=crop';
-
-const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-2xl border border-border bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-violet-400/70 focus-within:bg-violet-500/10">{children}</div>
-);
-
-const HIGHLIGHTS = [
-  { icon: <MapIcon className="h-5 w-5" />, title: 'A live 3D map', text: 'Every dataset on one map. Click any shape for its numbers.' },
-  { icon: <BadgeCheck className="h-5 w-5" />, title: 'Every number sourced', text: 'Publisher, date and license with every layer.' },
-  { icon: <Mail className="h-5 w-5" />, title: 'One email per release', text: 'Only when new data is on the map. Unsubscribe anytime.' },
+/** What the site is made of. The heights are for the eye only (a skyline), so no percentages are shown. */
+const PARTS: HealthGraphData[] = [
+  { label: 'Live map', value: 92, color: '#7c3aed', description: 'Every dataset on one 3D map. Click any shape for its numbers.' },
+  { label: 'Insights', value: 64, color: '#a78bfa', description: 'Each new dataset as it lands, newest first.' },
+  { label: 'Ask the map', value: 78, color: '#22d3ee', description: 'Questions answered from the published data, checked number by number.' },
+  { label: 'Open data', value: 52, color: '#4c1d95', description: 'Source, date, license and a download with every layer.' },
 ];
 
-function Form() {
+function Form({ waiting }: { waiting: boolean }) {
   const next = useApp((s) => s.subscribeNext);
   const subscribed = useApp((s) => s.subscribed);
   const [email, setEmail] = useState('');
@@ -30,8 +28,8 @@ function Form() {
     navigate(next ?? '/map');
     window.scrollTo({ top: 0 });
   };
-  const { status, submit } = useSubscribe(next ? `gate:${next}` : 'popup', () => {
-    if (next) window.setTimeout(go, 800);
+  const { status, submit } = useSubscribe(next ? `gate:${next}` : waiting ? 'launch' : 'popup', () => {
+    if (next && !waiting) window.setTimeout(go, 800);
   });
   useEffect(() => {
     const t = window.setTimeout(() => input.current?.focus(), 250);
@@ -39,71 +37,73 @@ function Form() {
   }, []);
   const done = status.kind === 'done' || (subscribed && status.kind === 'idle');
 
-  return (
-    <div className="flex flex-col gap-5">
-      <p className="animate-element text-xs font-semibold uppercase tracking-[0.25em] text-violet-600">Free · no card · no password</p>
-      <h2 id="subscribe-title" className="animate-element animate-delay-100 font-display text-4xl font-semibold leading-tight tracking-tight text-foreground">
-        {done ? "You're in." : next ? 'Subscribe to open the map' : 'Subscribe'}
-      </h2>
-      <p className="animate-element animate-delay-200 text-muted-foreground">
-        {done ? 'Everything on the site is open to you now. You will hear from us only when new data is on the map.' : `${site.title} is free. Leave your email and the live map opens right away. One email per release, nothing else.`}
-      </p>
-      {done ? (
-        <div className="animate-element animate-delay-300 space-y-4">
-          <p className="flex items-center gap-2 rounded-2xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800 ring-1 ring-emerald-200">
-            <Check className="h-5 w-5 shrink-0" /> You're on the list.
-          </p>
-          <button type="button" onClick={go} className="w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+  if (done)
+    return (
+      <div className="mt-6 space-y-3">
+        <p className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3.5 text-sm font-medium text-emerald-800 ring-1 ring-emerald-200">
+          <Check className="h-5 w-5 shrink-0" /> {waiting ? "You're on the list. One email, the day the map opens." : "You're on the list."}
+        </p>
+        {waiting ? (
+          <button type="button" onClick={closeSubscribe} className="w-full rounded-xl bg-primary py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+            Done
+          </button>
+        ) : (
+          <button type="button" onClick={go} className="w-full rounded-xl bg-primary py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
             Explore the map
           </button>
+        )}
+      </div>
+    );
+  return (
+    <form
+      className="mt-6 space-y-3"
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        void submit(email);
+      }}
+    >
+      <p className="text-sm text-muted-foreground">
+        {waiting
+          ? `${site.title} is almost ready. Put down your email and wait for the launch: one email the day the map opens, nothing else.`
+          : `${site.title} is free. Leave your email and the live map opens right away. One email per release, nothing else.`}
+      </p>
+      <div>
+        <label htmlFor="subscribe-email" className="sr-only">
+          Email address
+        </label>
+        <div className="relative rounded-xl border border-border bg-foreground/[0.03] transition-colors focus-within:border-violet-400/70 focus-within:bg-violet-500/10">
+          <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            ref={input}
+            id="subscribe-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="Your email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={status.kind === 'busy'}
+            className="w-full rounded-xl bg-transparent p-3.5 pl-11 text-sm focus:outline-none"
+          />
         </div>
-      ) : (
-        <form
-          className="space-y-4"
-          noValidate
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submit(email);
-          }}
-        >
-          <div className="animate-element animate-delay-300">
-            <label htmlFor="subscribe-email" className="text-sm font-medium text-muted-foreground">
-              Email address
-            </label>
-            <GlassInputWrapper>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  ref={input}
-                  id="subscribe-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={status.kind === 'busy'}
-                  className="w-full rounded-2xl bg-transparent p-4 pl-11 text-sm focus:outline-none"
-                />
-              </div>
-            </GlassInputWrapper>
-            {status.kind === 'error' && (
-              <p className="mt-2 text-sm text-rose-700" role="alert">
-                {status.message}
-              </p>
-            )}
-          </div>
-          <button type="submit" disabled={status.kind === 'busy'} className="animate-element animate-delay-400 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground shadow-lg shadow-violet-500/30 transition-colors hover:bg-primary/90 disabled:opacity-60">
-            {status.kind === 'busy' ? 'Adding you…' : 'Subscribe, free'}
-          </button>
-        </form>
-      )}
-    </div>
+        {status.kind === 'error' && (
+          <p className="mt-2 text-sm text-rose-700" role="alert">
+            {status.message}
+          </p>
+        )}
+      </div>
+      <button type="submit" disabled={status.kind === 'busy'} className="w-full rounded-xl bg-primary py-3.5 text-sm font-medium text-primary-foreground shadow-lg shadow-violet-500/25 transition-colors hover:bg-primary/90 disabled:opacity-60">
+        {status.kind === 'busy' ? 'Adding you…' : waiting ? 'Join the launch list' : 'Subscribe, free'}
+      </button>
+    </form>
   );
 }
 
 export function SubscribeDialog() {
   const open = useApp((s) => s.subscribeOpen);
+  const next = useApp((s) => s.subscribeNext);
+  const waiting = !site.launched;
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeSubscribe();
@@ -115,6 +115,12 @@ export function SubscribeDialog() {
       document.body.style.overflow = overflow;
     };
   }, [open]);
+
+  const stats: StatData[] = [
+    { value: 'Free', title: 'No card needed' },
+    { value: 1, unit: 'email', title: waiting ? 'On launch day' : 'Per release' },
+    { value: 'Open', title: 'Data to download' },
+  ];
 
   return (
     <AnimatePresence>
@@ -128,29 +134,26 @@ export function SubscribeDialog() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 360, damping: 32 }}
-            className="relative grid w-full max-w-4xl overflow-hidden rounded-[28px] bg-background shadow-2xl ring-1 ring-black/5 md:grid-cols-[1fr_1fr]"
+            className="relative w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <button type="button" onClick={closeSubscribe} className="absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/80 text-slate-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:text-slate-900" aria-label="Close">
+            <button type="button" onClick={closeSubscribe} className="absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Close">
               <X className="h-4 w-4" />
             </button>
-            <section className="p-8 md:p-10">
-              <Form />
-            </section>
-            <section className="relative hidden min-h-[480px] p-3 md:block">
-              <div className="animate-slide-right animate-delay-200 absolute inset-3 rounded-[22px] bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
-              <div className="absolute inset-x-8 bottom-8 flex flex-col gap-3">
-                {HIGHLIGHTS.map((h, i) => (
-                  <div key={h.title} className={`animate-testimonial ${['animate-delay-600', 'animate-delay-800', 'animate-delay-1000'][i]} flex items-start gap-3 rounded-2xl border border-white/20 bg-white/55 p-3.5 backdrop-blur-xl`}>
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-violet-600 text-white">{h.icon}</div>
-                    <div className="text-sm leading-snug">
-                      <p className="font-medium text-slate-900">{h.title}</p>
-                      <p className="text-slate-700">{h.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+            <HealthStatCard
+              className="rounded-3xl border-black/5 p-7 shadow-2xl"
+              headerIcon={waiting ? <Rocket className="h-6 w-6" /> : <MapPinned className="h-6 w-6" />}
+              title={waiting ? 'Wait for the launch' : next ? 'Subscribe to open the map' : 'Subscribe'}
+              titleId="subscribe-title"
+              stats={stats}
+              graphData={PARTS}
+              graphHeight={104}
+              barMaxWidth={44}
+              showValues={false}
+              legendTitle={waiting ? 'Launching with' : 'On the site'}
+            >
+              <Form waiting={waiting} />
+            </HealthStatCard>
           </motion.div>
         </motion.div>
       )}

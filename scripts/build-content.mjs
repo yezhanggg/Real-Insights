@@ -78,6 +78,7 @@ for (const k of ['title', 'tagline', 'author', 'url']) if (!site[k]) fail(siteFi
 site.url = String(site.url ?? '').replace(/\/$/, '');
 site.home = checkView(site.home, siteFile, 'home');
 site.gate = ['off', 'data', 'map'].includes(site.gate) ? site.gate : 'map';
+site.launched = site.launched !== false;
 
 // ------------------------------------------------------------------ layers
 function readLayers(dir, example) {

@@ -3,6 +3,7 @@
 Read README.md and docs/ARCHITECTURE.md first.
 
 - Content is files: `content/site.yaml`, `content/layers/*.yaml` + `public/data/*.geojson` (every update is a dataset; there are no posts). `scripts/build-content.mjs` validates and compiles them; never hand-edit `src/generated/`.
+- Before launch, `launched: false` in `content/site.yaml` makes `/map` and `/updates` (Insights) show `ComingSoon.tsx` and turns Subscribe into a wait-list.
 - Screens: `/` start page (no map), `/subscribe`, `/map` (MapStage, steered only through the Zustand store: `camera`, `layers`, `look`, `focus`, `feature`, `agentPins`).
 - Pasted UI components live in `src/components/ui/` (shadcn convention, `@/` → `src/`); see docs/ARCHITECTURE.md for how each was adapted.
 - Keys are server-side only (`api/*.ts`, read from `.env` locally / Vercel env in production). Never add a `VITE_` secret. Never commit `.env`.

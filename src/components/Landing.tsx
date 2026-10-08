@@ -1,5 +1,5 @@
-// The start page: the Orbit hero (a data globe, no map) and the footer. Explore map and Release updates are links
-// to their own pages; Subscribe, the one button, opens the pop-up.
+// The start page: the Orbit hero (a data globe, no map) and the footer. Explore map and Insights are links to their
+// own pages (before launch, both show the "Coming soon" page); Subscribe, the one button, opens the pop-up.
 import { Suspense, lazy, useEffect } from 'react';
 import { site } from '../lib/content';
 import { navigate } from '../lib/router';
@@ -10,9 +10,10 @@ import SiteFooter from './ui/footer-1';
 // The 3D hero (three.js) loads in its own chunk, so the map tool never pays for it.
 const OrbitHero = lazy(() => import('./ui/orbit-delivery-hero'));
 
-/** Into the map, or the Subscribe pop-up first when the site asks for an email before the map. */
+/** Into the map, or the Subscribe pop-up first when the site asks for an email before the map. Before launch the map's
+ * address shows the "Coming soon" page, and nothing is asked. */
 export function exploreMap(path = '/map') {
-  if (site.gate === 'map' && !useApp.getState().subscribed) return openSubscribe(path);
+  if (site.launched && site.gate === 'map' && !useApp.getState().subscribed) return openSubscribe(path);
   navigate(path);
   window.scrollTo({ top: 0 });
 }

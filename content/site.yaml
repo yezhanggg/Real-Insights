@@ -1,7 +1,7 @@
 # Site-wide settings. Edit freely; `npm run dev` picks changes up on save.
 title: Vision REAL
 # One line on the landing page and in the RSS feed.
-tagline: Real estate data on a live map. Every number has a source and an address.
+tagline: See the real. Tell the story. Drive the change. AI-powered housing insight for every city.
 author: Ye Zhang
 # The public address once deployed (used by the RSS feed, the sitemap and share links). No trailing slash.
 url: https://real-vision-xi.vercel.app
@@ -19,6 +19,9 @@ home:
 #   map  - "Open the map" asks for an email first   <- default ("no fee, just subscribe to view")
 # This is a friendly ask, not security: the data files are public by design.
 gate: map
+# Before launch, keep this false: "Explore map" and "Insights" answer "Coming soon" where they stand, and Subscribe
+# is a wait-list ("leave your email and wait for the launch"). Set it to true on launch day and the links open.
+launched: false
 # Optional links shown at the bottom of the landing page.
 links:
   - label: LinkedIn

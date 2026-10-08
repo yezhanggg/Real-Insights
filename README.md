@@ -1,14 +1,15 @@
 # Vision REAL
 
-*Real estate data on a live map. Every number has a source and an address.*
+*See the real. Tell the story. Drive the change. AI-powered housing insight for every city.*
 
 **Vision REAL is a free, live map of real estate data by Ye Zhang.** New datasets go up as they're ready. Subscribers get one email per update, and everyone can explore, click and download everything on the map. The site has three screens:
 
 | Screen | What it is | Built from |
 |---|---|---|
-| **Start page** (`/`) | No map. A line-drawn purple glass globe rising from the bottom like a horizon: coastlines (Natural Earth), a fine grid with the far side showing through, a network of hubs with pulses travelling between them, and instrument rings. Drag to turn it. The header has two links, **Explore map** and **Release updates**, and one button, **Subscribe**. | `Landing.tsx` + `ui/orbit-delivery-hero.tsx`, `ui/footer-1.tsx` |
-| **Release updates** (`/updates`) | Every dataset, newest first; hover a row for a preview photo that follows the cursor, click to open it on the map. | `Updates.tsx` + `ui/project-showcase.tsx` |
-| **Subscribe pop-up** | Opens over any page (also at `/subscribe`). Email only (no accounts or passwords). The form is on the left, and a city photo with three facts about the site is on the right. When the map asked for it, the reader goes straight on into the map. | `ui/subscribe-dialog.tsx` |
+| **Start page** (`/`) | No map. A line-drawn purple glass globe rising from the bottom like a horizon: coastlines (Natural Earth), a fine grid with the far side showing through, a network of hubs with pulses travelling between them, and instrument rings. It turns from the first frame and never stops; drag to spin it. The header has the site's name, two links, **Explore map** and **Insights**, and one button, **Subscribe**. | `Landing.tsx` + `ui/orbit-delivery-hero.tsx`, `ui/footer-1.tsx` |
+| **Insights** (`/updates`) | Every dataset, newest first; hover a row for a preview photo that follows the cursor, click to open it on the map. | `Updates.tsx` + `ui/project-showcase.tsx` |
+| **Subscribe pop-up** | Opens over any page (also at `/subscribe`). Email only (no accounts or passwords). One card: three facts, a row of bars naming what the site is made of, and the email form. Before launch it is a wait-list. After launch, when the map asked for it, the reader goes straight on into the map. | `ui/subscribe-dialog.tsx`, `ui/health-stat-card.tsx` |
+| **Coming soon** | Before launch, `/map` and `/updates` show this instead: a thinking orb, "Superloading…", "Coming soon". | `ComingSoon.tsx` |
 | **Map** (`/map`, `/map/<dataset>`) | The tool, laid out like the VisionPitts Explore screen: the live 3D map with Home, the **Data** panel, **Ask the map**, **Details** (click any shape) and the legend. | `MapTool.tsx`, `MapStage.tsx`, `ChatBox.tsx`, `api/agent.ts` |
 
 No analysis is published yet. A working **example dataset** (Philadelphia median rent by census tract) appears only when you run the site locally, labeled "Example", so you can see every feature. Production builds leave it out.
@@ -36,9 +37,13 @@ uv run --project pipeline python pipeline/publish_layer.py my_data.gpkg \
   --color-field value --popup-title address --tags permits,philadelphia
 ```
 
-That writes `public/data/phl-permits-2025.geojson` and `content/layers/phl-permits-2025.yaml` (title, one-line description, notes, source, colors, popup fields, and an optional cover `image` for the updates list). Deploy, and the dataset appears in the map's Data panel, at the top of **Release updates**, and in `/feed.xml`. Then email subscribers, by hand or automatically from the RSS feed.
+That writes `public/data/phl-permits-2025.geojson` and `content/layers/phl-permits-2025.yaml` (title, one-line description, notes, source, colors, popup fields, and an optional cover `image` for the updates list). Deploy, and the dataset appears in the map's Data panel, at the top of **Insights**, and in `/feed.xml`. Then email subscribers, by hand or automatically from the RSS feed.
 
 Full guide: **[docs/PUBLISHING.md](docs/PUBLISHING.md)**.
+
+## Before launch
+
+`launched: false` in `content/site.yaml` is the pre-launch state, and it is how the site is set now. **Explore map** and **Insights** lead to the Coming soon page, and Subscribe is a wait-list: put down an email and wait for the launch. Set `launched: true` and the links open the real pages (set it locally to work on the map).
 
 ## Free, with a subscribe ask
 
@@ -68,7 +73,7 @@ It's a friendly ask, not security: the browser remembers the sign-up, and the da
 
 React 19 · TypeScript · Vite · Tailwind CSS 4 (shadcn conventions: `@/` alias, `components/ui`, `cn`) · Motion · MapLibre GL 5 (OpenFreeMap positron, Mapterhorn/USGS 3DEP terrain, 3D buildings) · three.js + React Three Fiber (start page) · Zustand · Vercel (static site + two serverless functions) · DeepSeek (`deepseek-flash`) · Python 3.11+ with GeoPandas for the data.
 
-The map tool, chat box and design system come from [VisionPitts](https://ye-zhang-vision-pitts.vercel.app). The start-page hero and its text reveal, the Subscribe button, the updates list, the Subscribe pop-up and the footer are 21st.dev components adapted to the site; see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#integrated-ui-components).
+The map tool, chat box and design system come from [VisionPitts](https://ye-zhang-vision-pitts.vercel.app). The start-page hero and its text reveal, the cursor crosshair, the Subscribe button, the updates list, the Subscribe pop-up and the footer are 21st.dev components adapted to the site; see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#integrated-ui-components).
 
 ## Principles
 

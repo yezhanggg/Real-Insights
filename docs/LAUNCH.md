@@ -50,6 +50,7 @@ Add a domain under Vercel → Domains, or keep `<project>.vercel.app`. Then upda
 - [ ] Update `tagline`, `links` and `url` in `content/site.yaml`, and choose the `gate` setting (`map`, `data` or `off`).
 - [ ] Publish the first real dataset (the example is dev-only).
 - [ ] Add the env vars in Vercel and redeploy.
+- [ ] Set `launched: true` in `content/site.yaml`. Until then the map and Insights show "Coming soon" and Subscribe collects the wait-list.
 - [ ] On the live site: subscribe with your own email, open the map on your phone, ask the assistant one question.
 - [ ] Optional: Vercel Web Analytics (Project → Analytics), which works with no code changes.
 

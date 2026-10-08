@@ -1,11 +1,13 @@
-// Screens: the start page (no map), Release updates, and the map tool. Subscribe is a pop-up over any of them.
+// Screens: the start page (no map), Insights (/updates), and the map tool. Subscribe is a pop-up over any of them.
 // With `gate: map` (content/site.yaml), a not-yet-subscribed reader who opens a map link sees the start page with the
-// pop-up open, and goes on into the map once they're in.
+// pop-up open, and goes on into the map once they're in. Before launch (`launched: false`), the map's and Insights'
+// addresses show the "Coming soon" page instead, and nothing is asked.
 import { useEffect } from 'react';
 import { site } from './lib/content';
 import { linkClick, parse, usePath } from './lib/router';
 import { useApp } from './lib/store';
 import { openSubscribe } from './lib/subscribe';
+import ComingSoon from './components/ComingSoon';
 import Landing from './components/Landing';
 import Updates from './components/Updates';
 import MapTool from './components/MapTool';
@@ -29,7 +31,8 @@ export default function App() {
   const path = usePath();
   const route = parse(path);
   const subscribed = useApp((s) => s.subscribed);
-  const asked = route.name === 'map' && site.gate === 'map' && !subscribed;
+  const soon = !site.launched && (route.name === 'map' || route.name === 'updates');
+  const asked = site.launched && route.name === 'map' && site.gate === 'map' && !subscribed;
   const target = route.name === 'map' ? `/map${route.layer ? `/${route.layer}` : ''}` : null;
 
   useEffect(() => {
@@ -41,7 +44,8 @@ export default function App() {
   }, [route.name]);
 
   let screen: React.ReactNode;
-  if (route.name === 'map' && !asked) screen = <MapTool focus={route.layer} />;
+  if (soon) screen = <ComingSoon what={route.name === 'map' ? 'map' : 'insights'} />;
+  else if (route.name === 'map' && !asked) screen = <MapTool focus={route.layer} />;
   else if (route.name === 'updates') screen = <Updates />;
   else if (route.name === 'missing') screen = <Missing />;
   else screen = <Landing />;

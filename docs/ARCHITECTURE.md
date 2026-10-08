@@ -17,11 +17,13 @@ browser ─► /api/subscribe ─► Buttondown or Supabase
 | Path | Screen | Notes |
 |---|---|---|
 | `/` | `Landing.tsx` | Orbit hero (lazy-loaded chunk, three.js) → footer. No map. |
-| `/updates` | `Updates.tsx` | Release updates: one row per dataset, newest first |
+| `/updates` | `Updates.tsx` | Insights: one row per dataset, newest first |
 | `/subscribe?next=/map/…` | the start page with the pop-up open | `next` must be a path on this site. The pop-up (`ui/subscribe-dialog.tsx`) opens over any page via `openSubscribe(next)` in `src/lib/subscribe.ts`. |
 | `/map`, `/map/<id>` | `MapTool.tsx` | `/atlas` (the old address) still works. The address follows the last dataset turned on, so it can be shared. |
 
 With `gate: map`, a not-yet-subscribed reader who opens any `/map…` link sees the start page with the pop-up open, and goes on into the map once subscribed.
+
+**Before launch.** While `launched: false` in `content/site.yaml`, `/map…` and `/updates` render `ComingSoon.tsx` (a thinking orb, "Superloading…", "Coming soon") instead, nothing is asked at the gate, and the Subscribe pop-up is a wait-list. `App.tsx` makes that choice; set `launched: true` to open the pages.
 
 ## The content build
 
@@ -48,14 +50,15 @@ Pasted components live in `src/components/ui/` (the shadcn convention; `@/` maps
 
 | File | Origin | Changes |
 |---|---|---|
-| `orbit-delivery-hero.tsx` + `world-lines.ts`, `world-dots.ts` | 21st.dev "Orbit Delivery" | Kept the template's drag-to-turn motion, layout and responsive camera. The planet and courier models are gone. In their place is a line-drawn purple glass globe, sitting on the bottom edge so only its upper half shows. It is a transparent shader sphere (graticule, rim, scan line) with its back faces drawn faintly first. It carries 186 Natural Earth coastlines (`world-lines.ts`); a depth-only inner shell hides the far side from the bright front layers, while faint ghost layers show it through the glass. A seeded network of hubs on land (`world-dots.ts`) carries travelling pulses, and there are instrument rings. The palette is violet; the header has links plus the one Subscribe button; the headline, the drag caption, story dialogs and debug "prototype" mode are removed. Nothing to download: no GLB or Draco. |
-| `text-reveal.tsx` + `text-reveal-utils/*` | 21st.dev "text-reveal" | Used for the start page's statement and its two corner captions. The component is as published. Its two helper files, missing from the template, were written here: the timing tokens and the CSS module with the keyframes. The entrance is CSS only, and the resting state is the visible one. |
-| `hover-glow-button.tsx` | 21st.dev "hover-glow-button" | The Subscribe button in both headers. Violet defaults, the usual button props, and size and shape left to `className`. No glow and no inline color while disabled, so "Subscribed ✓" keeps its quiet look. The template's theme CSS (radius overrides, a ripple color, `tw-animate-css`) isn't used by the component and was left out. |
+| `orbit-delivery-hero.tsx` + `world-lines.ts`, `world-dots.ts` | 21st.dev "Orbit Delivery" | Kept the template's drag-to-turn motion (made about twice as fast), layout and responsive camera. The Pause button and the Space shortcut are gone; the globe turns from the first frame. The planet and courier models are gone. In their place is a line-drawn purple glass globe, with its center just below the bottom edge so a little less than its upper half shows. It is a transparent shader sphere (graticule, rim, scan line) with its back faces drawn faintly first. It carries 186 Natural Earth coastlines (`world-lines.ts`); a depth-only inner shell hides the far side from the bright front layers, while faint ghost layers show it through the glass. A seeded network of hubs on land (`world-dots.ts`) carries travelling pulses, and there are instrument rings. The palette is violet; the header has the site's name (no logo), links and the one Subscribe button; the headline, the drag caption, the two corner captions, story dialogs and debug "prototype" mode are removed. Nothing to download: no GLB or Draco. |
+| `text-reveal.tsx` + `text-reveal-utils/*` | 21st.dev "text-reveal" | Used for the start page's slogan and the line under it. The component is as published. Its two helper files, missing from the template, were written here: the timing tokens and the CSS module with the keyframes. The entrance is CSS only, and the resting state is the visible one. |
+| `cursor-crosshair.tsx` | 21st.dev "variable-font-and-cursor" | Only the demo's cursor-following part: two hairlines and a small square that track the mouse across the start page's hero. The variable-font text, the x/y readout, the two mouse hooks and `framer-motion` are not used. The position is written straight to CSS variables, so nothing re-renders. Mouse only. The square replaces the pointer over the globe and steps aside over links and buttons. |
+| `3d-button.tsx` | 21st.dev "3d-button" | The Subscribe button in both headers. Its moves are kept (letters rolling on hover, a light round the edge, the swinging arrow, the splash on a press, the outline drawing itself and the label change after a click). Its look is not: no purple slab, stacked shadow or tilt; a clear, upright pill. The template shipped keyframes only, so the rest of the styles were written here, under `.sub3d` in `src/styles.css` (the template's class names, `.button`, `.content`, `.outline`, would collide with Tailwind). The splash is restarted by a key, so a quick tap plays it through. |
 | `project-showcase.tsx` | 21st.dev "project-showcase" | Rows come in as props (one per dataset). The follow animation only runs while a preview shows. The preview is hidden on phones. |
-| `subscribe-dialog.tsx` | 21st.dev "sign-in" | Turned into a pop-up. Email only (no password or Google button, since there are no accounts). The template's testimonials became three factual cards. Escape or a click outside closes it. The entrance animations are in `styles.css`. |
+| `subscribe-dialog.tsx` + `health-stat-card.tsx`, `tooltip.tsx` | 21st.dev "health-stat-card", Origin UI tooltip | The Subscribe pop-up is the stat card with the email form under its legend. Email only. Motion instead of framer-motion; `children`, `titleId`, `barMaxWidth` and `showValues` were added. The three stats are words and the bars carry no figures (`showValues={false}`): they name the parts of the site, so nothing on the card is an invented number. The tooltip drops the `tw-animate-css` classes for one keyframe and opens above the pop-up. Escape or a click outside closes it. |
 | `footer-1.tsx` + `footer-1-utils/*` | 21st.dev "footer-1" | Plain links instead of `next/link`. The two helper files, missing from the template, were written here: the newsletter box posts to `/api/subscribe`. Only real links. |
 | `button.tsx`, `input.tsx` | shadcn | As published |
-| `ai-chat-input.tsx`, `thinking-orbs.tsx` | VisionPitts | The Ask the map input and thinking orb |
+| `ai-chat-input.tsx`, `thinking-orbs.tsx` | VisionPitts | The Ask the map input and thinking orb. The same orb, in its "breathing" state, is the mark of the Coming soon page. A pasted 21st.dev "thinking-orb" wrapper came without its helper files; it wraps this same library, so the package is used directly. |
 
 ## API functions (Vercel, Node)
 
@@ -66,14 +69,14 @@ Pasted components live in `src/components/ui/` (the shadcn convention; `@/` maps
 
 ```
 api/                       serverless functions (+ tests)
-content/site.yaml          title, tagline, map home view, gate, links
+content/site.yaml          title, tagline, map home view, gate, launched, links
 content/layers/            published dataset descriptions (YAML)
 content/examples/          dev-only example dataset
 public/data/               dataset GeoJSON (served at /data/…)
 pipeline/                  Python: publish_layer, Census helpers, spatial toolkit
 scripts/build-content.mjs  content → src/generated/content.json + feed + sitemap
 src/App.tsx                screen switch + gate redirect
-src/components/            Landing, Updates, SiteHeader, MapTool, MapStage, ChatBox, Legend, primitives, ui/
+src/components/            Landing, Updates, ComingSoon, SiteHeader, MapTool, MapStage, ChatBox, Legend, primitives, ui/
 src/lib/                   content, map, store, router, chat, subscribe, format, utils, types
 src/styles.css             theme tokens (Tailwind 4) + map pins + page animations
 ```

@@ -63,6 +63,8 @@ export interface Site {
   url: string;
   home: View;
   gate: 'off' | 'data' | 'map';
+  /** False before launch: the map and Insights links answer "Coming soon" and Subscribe is a wait-list. */
+  launched: boolean;
   links?: { label: string; url: string }[];
 }
 

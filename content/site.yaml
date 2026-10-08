@@ -4,7 +4,7 @@ title: Vision REAL
 tagline: See the real. Tell the story. Drive the change. AI-powered housing insight for every city.
 author: Ye Zhang
 # The public address once deployed (used by the RSS feed, the sitemap and share links). No trailing slash.
-url: https://real-vision-xi.vercel.app
+url: https://vision-real.vercel.app
 # Where the map lands when someone opens it.
 home:
   name: Philadelphia

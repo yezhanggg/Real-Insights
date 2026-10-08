@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://real-vision-xi.vercel.app/sitemap.xml
+Sitemap: https://vision-real.vercel.app/sitemap.xml

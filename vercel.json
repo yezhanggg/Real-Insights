@@ -4,6 +4,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "trailingSlash": false,
+  "functions": { "api/agent.ts": { "maxDuration": 60 } },
   "headers": [
     { "source": "/data/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }, { "key": "Access-Control-Allow-Origin", "value": "*" }] },
     { "source": "/feed.xml", "headers": [{ "key": "Content-Type", "value": "application/rss+xml; charset=utf-8" }] }

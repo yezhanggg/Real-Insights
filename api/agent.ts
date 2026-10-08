@@ -7,7 +7,8 @@
 //  3. It never invents a figure. Every number in an answer must appear in the catalog, a tool result or the
 //     conversation; anything else is reported back as `unverified` and the page says so.
 //  4. Keys stay on the server. Input is size-limited, requests are rate-limited per visitor, nothing is stored.
-import content from '../src/generated/content.json';
+// The attribute is required: Vercel runs this file as a native ES module, and Node refuses a JSON import without it.
+import content from '../src/generated/content.json' with { type: 'json' };
 
 interface Req {
   method?: string;

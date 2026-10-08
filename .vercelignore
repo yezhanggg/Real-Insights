@@ -1,0 +1,2 @@
+# Not part of the deployed site. Without this, Vercel turns every file in api/ into a public endpoint, tests included.
+api/*.test.ts

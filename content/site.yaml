@@ -4,7 +4,7 @@ title: Vision REAL
 tagline: Real estate data on a live map. Every number has a source and an address.
 author: Ye Zhang
 # The public address once deployed (used by the RSS feed, the sitemap and share links). No trailing slash.
-url: https://real-insights.vercel.app
+url: https://real-vision-xi.vercel.app
 # Where the map lands when someone opens it.
 home:
   name: Philadelphia

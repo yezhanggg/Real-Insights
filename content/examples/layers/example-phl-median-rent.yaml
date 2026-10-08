@@ -1,0 +1,55 @@
+id: example-phl-median-rent
+title: Median gross rent by census tract, Philadelphia
+dek: What renters pay each month, rent plus utilities, ACS 2019–2023.
+about: Example layer. American Community Survey 5-year estimates (table B25064). Small-area
+  figures carry margins of error; treat neighboring tracts that differ by a little
+  as about the same.
+source:
+  name: U.S. Census Bureau, ACS 2019–2023 5-year (B25064, B25003)
+  url: https://data.census.gov/table/ACSDT5Y2023.B25064
+license: Public domain (U.S. Government work)
+updated: '2026-10-05'
+tags:
+- rent
+- census
+- philadelphia
+- example
+data: data/examples/example-phl-median-rent.geojson
+style:
+  type: fill
+  color:
+    field: median_rent
+    stops:
+    - - 800
+      - '#fdf4e3'
+    - - 1100
+      - '#fbdcaa'
+    - - 1200
+      - '#f6b26b'
+    - - 1400
+      - '#e9824a'
+    - - 1600
+      - '#cc5234'
+    - - 2300
+      - '#8f2d2a'
+legend:
+  title: Median gross rent
+  format: money
+popup:
+  title: tract
+  fields:
+  - field: GEOID
+    label: GEOID
+    format: text
+  - field: median_rent
+    label: Median gross rent
+    format: money
+  - field: households
+    label: Households
+    format: number
+  - field: renter_households
+    label: Renter households
+    format: number
+  - field: renter_share
+    label: Renter share
+    format: percent

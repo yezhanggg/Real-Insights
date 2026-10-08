@@ -1,0 +1,36 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Node / Vite
+node_modules/
+dist/
+.vercel/
+src/generated/
+public/feed.xml
+public/sitemap.xml
+
+# Python pipeline
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+pipeline/raw/
+pipeline/work/
+*.tif
+*.tiff
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.gpkg
+*.parquet
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,27 @@
+# Site-wide settings. Edit freely; `npm run dev` picks changes up on save.
+title: Vision REAL
+# One line on the landing page and in the RSS feed.
+tagline: Real estate data on a live map. Every number has a source and an address.
+author: Ye Zhang
+# The public address once deployed (used by the RSS feed, the sitemap and share links). No trailing slash.
+url: https://real-insights.vercel.app
+# Where the map lands when someone opens it.
+home:
+  name: Philadelphia
+  lng: -75.1652
+  lat: 39.9526
+  zoom: 14.2
+  pitch: 60
+  bearing: -28
+# Who must subscribe (free, email only) before seeing what:
+#   off  - nothing is gated
+#   data - the map opens for everyone; turning on a data layer or downloading asks for an email
+#   map  - "Open the map" asks for an email first   <- default ("no fee, just subscribe to view")
+# This is a friendly ask, not security: the data files are public by design.
+gate: map
+# Optional links shown at the bottom of the landing page.
+links:
+  - label: LinkedIn
+    url: https://www.linkedin.com/
+  - label: Email
+    url: mailto:deepbluepartners.co@gmail.com

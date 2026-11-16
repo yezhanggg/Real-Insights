@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@react-three/fiber": "^9.8.1",
+    "@vercel/speed-insights": "^2.1.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.52.0",
     "maplibre-gl": "^5.24.0",

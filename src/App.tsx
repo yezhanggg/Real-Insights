@@ -3,6 +3,7 @@
 // pop-up open, and goes on into the map once they're in. Before launch (`launched: false`), the map's and Insights'
 // addresses show the "Coming soon" page instead, and nothing is asked.
 import { useEffect } from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { site } from './lib/content';
 import { linkClick, parse, usePath } from './lib/router';
 import { useApp } from './lib/store';
@@ -57,6 +58,7 @@ export default function App() {
       {!mapTool && <SiteHeader current={route.name === 'map' ? 'map' : route.name === 'updates' ? 'updates' : undefined} />}
       {screen}
       <SubscribeDialog />
+      <SpeedInsights />
     </>
   );
 }
